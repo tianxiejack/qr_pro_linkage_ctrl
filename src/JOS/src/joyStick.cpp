@@ -157,6 +157,7 @@ void CJoystick::procJosEvent_Axis(UINT8  mjosNum)
 							mouseCtrl = true;
 							printf("mouse \n");
 						}
+						josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 					}
 					break;
 
@@ -234,14 +235,13 @@ void CJoystick::procMouse_Axis(UINT8  mjosNum)
 						{
 							mouseCtrl = false;
 							printf("joystick \n");
-							josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 						}
 						else
 						{
 							mouseCtrl = true;
 							printf("mouse \n");
-							josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 						}
+						josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 					}
 					break;
 
@@ -250,13 +250,13 @@ void CJoystick::procMouse_Axis(UINT8  mjosNum)
 					{
 						if(zoom)
 						{
-						_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomShort ) = 0;
-						josSendMsg(MSGID_EXT_INPUT_OPTICZOOMSHORTCTRL);
+							_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomShort ) = 0;
+							josSendMsg(MSGID_EXT_INPUT_OPTICZOOMSHORTCTRL);
 						}
 						else
 						{
-						_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomLong ) = 0;
-						josSendMsg(MSGID_EXT_INPUT_OPTICZOOMLONGCTRL);
+							_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomLong ) = 0;
+							josSendMsg(MSGID_EXT_INPUT_OPTICZOOMLONGCTRL);
 						}
 
 					}
@@ -375,21 +375,25 @@ void CJoystick::procMouse_Button(UINT8  njosNum)
 	switch (njosNum) {
     		case 0x00:
     				if(jse->value == 1){
-    					printf("1 \n");
     				}
     				break;
     		case 0x01:
     			if(jse->value == 1){
-    				printf("2 \n");
     			}
     				break;
     		case 0x02:
     			if(jse->value == 1)
+    			{
     			printf("左键 \n");
+    			josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+    			}
     				break;
     		case 0x03:
     			if(jse->value == 1)
+    			{
     			printf("右键 \n");
+    			josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+    			}
     			break;
     		case 0x04:
     			if(jse->value == 1){

@@ -1126,6 +1126,7 @@ void CManager::usd_API_WORKMODEWITCH()
 		printf("单控球机 \n");
 		break;
 	}
+	usd_API_ctrlParams();
 }
 
 void CManager::usd_API_ctrlParams()
