@@ -12,7 +12,7 @@ CGlobalDate::CGlobalDate():EXT_Ctrl(Cmd_Mesg_Max), Host_Ctrl(40), commode(2), fe
 {
 	jos_ctrl = host_ctrl = 0;
 	joystick_flag = 0;
-	 workMode = captureMode = 0;
+	 workMode = 0;
 	outputMode = 0;
 	target = time_start = respupgradefw_stat = respupgradefw_perc = respexpconfig_stat = respexpconfig_len = ImgMtdStat = mtdMode = ThreeMode_bak = 0;
 	memset(respexpconfig_buf, 0, sizeof(respexpconfig_buf));

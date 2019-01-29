@@ -62,7 +62,9 @@ private:
 	int read_joystick_event(joy_event *jse);
 	void JoystickProcess();
 	void procJosEvent_Axis(UINT8  mjosNum );
+	void procMouse_Axis(UINT8 mjosNum);
     void ProcJosEvent_Button(UINT8 njosNum);
+    void procMouse_Button(UINT8 njosNum);
     void Y_CtrlIrisAndFocus(int value);
 
     void josSendMsg(int MsgId);

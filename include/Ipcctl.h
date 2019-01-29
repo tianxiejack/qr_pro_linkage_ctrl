@@ -90,6 +90,17 @@ typedef enum
 }shm_perms;
 
 typedef struct{
+	int cursor_x;  //0~1920
+	int cursor_y;	//0~1080
+	int joy_button;	//0~9
+	int mouse_button;	//左键 右键
+	int enter;	//0,1
+	int menu;	//0,1
+	int workMode;	//1~3
+	int ctrlMode;	//1,2
+}ctrlParams;
+
+typedef struct{
 	unsigned int panPos;
 	unsigned int tilPos;
 	unsigned int zoom;

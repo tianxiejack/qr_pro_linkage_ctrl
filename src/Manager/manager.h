@@ -104,8 +104,6 @@ private:
 	static void MSGAPI_ExtInpuCtrl_IrisAndFocusAndExit(long p);
 	static void MSGAPI_ExtInpuCtrl_TRACKSEARCHCTRL(long p);
 	static void MSGAPI_ExtInpuCtrl_SwitchSensor(long p);
-	static void MSGAPI_ExtInpuCtrl_AIMPOSXCTRL(long p);
-	static void MSGAPI_ExtInpuCtrl_AIMPOSYCTRL(long p);
 	static void MSGAPI_ExtInpuCtrl_PRMBACK(long p);
 	static void MSGAPI_ExtInpuCtrl_zoomSpeed(long p);
 	static void MSGAPI_ExtInpuCtrl_ZOOMSHORTCTRL(long p);
@@ -119,7 +117,6 @@ private:
 	static void MSGAPI_ExtInpuCtrl_configWrite_Save(long p);
 	static void MSGAPI_ExtInpuCtrl_MTDCTRL(long p);
 	static void MSGAPI_ExtInpuCtrl_MTDMode(long p);
-	static void MSGAPI_ExtInpuCtrl_sceneTrk(long p);
 	static void MSGAPI_ExtInpuCtrl_MtdAreaBox(long p);
 	static void MSGAPI_EXT_INPUT_MtdPreset(long p);
 	static void MSGAPI_EXT_INPUT_CallPreset(long p);
@@ -131,6 +128,7 @@ private:
 	static void MSGAPI_EXT_INPUT_queryZoom(long p);
 	static void MSGAPI_EXT_INPUT_setPreset(long p);
 	static void MSGAPI_EXT_INPUT_goToPreset(long p);
+	static void MSGAPI_ExtInpuCtrl_WORKMODEWITCH(long p);
 
 	static void test_left(long p);
 	static void test_right(long p);
@@ -154,6 +152,7 @@ private:
 	static void MSGAPI_IPC_QueryPos(long p);
 	static void MSGAPI_IPC_INPUT_PosAndZoom(long p);
 	static void MSGAPI_IPC_INPUT_VideoNameAndPos(long p);
+	static void MSGAPI_IPC_INPUT_CTRLPARAMS(long p);
 	static void MSGAPI_IPC_INPUT_fontSize(long p);
 
 	void usd_API_AXIS();
@@ -178,6 +177,8 @@ private:
 	void usd_API_switchCameraFovAndLV(char chid);
 	void usd_API_fovCompensation();
 	void usd_API_IPC_TRACKCTRL();
+	void usd_API_WORKMODEWITCH();
+	void usd_API_ctrlParams();
 
 	void reset_status_AutoMtd();
 	void IPC_videoName_Pos();
@@ -189,10 +190,6 @@ private:
 	void switch_CameraChid();
 	void Observer_Chid();
 	void Observer_Action(int block, int field, float value);
-	float linear_interpolation_Y(float x0, float x1, float y0, float y1,unsigned short x);
-	float linear_interpolation_X(float x0, float x1, float y0, float y1, unsigned short x);
-	float dynamicSendBoresightPosX(unsigned short zoom);
-	float dynamicSendBoresightPosY(unsigned short zoom);
 	void refreshPtzParam();
 
 

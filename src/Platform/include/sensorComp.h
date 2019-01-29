@@ -165,7 +165,6 @@ class CSensorComp{
 public:
 	CSensorComp();
 	~CSensorComp(){};
-	float ZoomFovCompensation(unsigned short zoom);
 
 static inline void SensorComp_CreateParams_Init(SensorComp_CreateParams *pPrm, int i, View* Pserson)
 {
@@ -203,7 +202,6 @@ int SensorComp_CleanTab(HSENSORCOMP hComp);
 
 private:
 	static CGlobalDate* _GlobalDate;
-	float linear_interpolation_Fov(float x0, float x1, float y0, float y1, float x);
 };
 
 

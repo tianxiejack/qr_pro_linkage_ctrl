@@ -26,8 +26,6 @@ public:
 
 	virtual HPLTCTRL PlatformCtrl_Create(PlatformCtrl_CreateParams *pPrm) = 0;
 
-	virtual int PlatformCtrl_sensorCompensation(HPLTCTRL handle) = 0;
-
 	virtual void PlatformCtrl_CreateParams_Init(PlatformCtrl_CreateParams *pPrm, \
 			configPlatParam_InitParams *m_Prm, View* m_Sensor) = 0;
 

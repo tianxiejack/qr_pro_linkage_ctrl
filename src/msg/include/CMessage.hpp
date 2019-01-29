@@ -34,8 +34,6 @@ typedef enum _sys_msg_id_ {
     MSGID_EXT_INPUT_IMGENHCTRL,
     MSGID_EXT_INPUT_MMTCRTL,
     MSGID_EXT_INPUT_MMTSelect,
-    MSGID_EXT_INPUT_AIMPOSXCTRL,
-    MSGID_EXT_INPUT_AIMPOSYCTRL,
     MSGID_EXT_INPUT_PLATCTRL,
     MSGID_EXT_INPUT_SwitchSensor,
     MSGID_EXT_INPUT_MtdPreset,
@@ -100,6 +98,7 @@ typedef enum _sys_msg_id_ {
     MSGID_EXT_INPUT_fontsize,
     MSGID_IPC_INPUT_reset_swtarget_timer,
     MSGID_IPC_INPUT_ballparam,
+    MSGID_IPC_INPUT_CTRLPARAMS,
     MAX_MSG_NUM
 }eSysMsgId, MSG_PROC_ID;
 
@@ -117,16 +116,14 @@ typedef enum comm_id{
 			//10
 	Cmd_Mesg_SensorCtrl = 11, 		//11
 	Cmd_Mesg_Mmt,					//12
-	Cmd_Mesg_AIMPOS_X,					//pov
-	Cmd_Mesg_AIMPOS_Y,					//pov
-	Cmd_Mesg_AXISX,				//15
-	Cmd_Mesg_AXISY,				//16
-	Cmd_Mesg_ImgEnh,				//17
-	Cmd_Mesg_PresetCtrl,        //18
-	Cmd_Mesg_IrisUp,     //19
-	Cmd_Mesg_IrisDown,  //20
-	Cmd_Mesg_FocusFar,  //21
-	Cmd_Mesg_FocusNear,  //22
+	Cmd_Mesg_AXISX,
+	Cmd_Mesg_AXISY,
+	Cmd_Mesg_ImgEnh,
+	Cmd_Mesg_PresetCtrl,
+	Cmd_Mesg_IrisUp,
+	Cmd_Mesg_IrisDown,
+	Cmd_Mesg_FocusFar,
+	Cmd_Mesg_FocusNear,
 
 	//ipc
 	Cmd_IPC_TrkCtrl,

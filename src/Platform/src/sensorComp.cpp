@@ -46,54 +46,6 @@ CSensorComp::CSensorComp()
 	_GlobalDate = CGlobalDate::Instance();
 }
 
-float CSensorComp::ZoomFovCompensation(unsigned short zoom)
-{
-	int chid = _GlobalDate->chid_camera;
-	float levelFov, value, value2;
-	View* ps;
-	ps = &viewParam;
-	if(zoom >= ps->zoombak1[chid] && zoom <= ps->zoombak2[chid])
-	{
-		levelFov = linear_interpolation_Fov(ps->zoombak1[chid], ps->zoombak2[chid], ps->level_Fov_continue1[chid],\
-				ps->level_Fov_continue2[chid], zoom);
-	}
-	else if(zoom > ps->zoombak2[chid] && zoom <= ps->zoombak3[chid])
-	{
-		levelFov = linear_interpolation_Fov(ps->zoombak2[chid], ps->zoombak3[chid], ps->level_Fov_continue2[chid],\
-				ps->level_Fov_continue3[chid], zoom);
-	}
-	else if(zoom > ps->zoombak3[chid] && zoom <= ps->zoombak4[chid])
-	{
-		levelFov = linear_interpolation_Fov(ps->zoombak3[chid], ps->zoombak4[chid], ps->level_Fov_continue3[chid],\
-				ps->level_Fov_continue4[chid], zoom);
-	}
-	else if(zoom > ps->zoombak4[chid] && zoom <= ps->zoombak5[chid])
-	{
-		levelFov = linear_interpolation_Fov(ps->zoombak4[chid], ps->zoombak5[chid], ps->level_Fov_continue4[chid],\
-				ps->level_Fov_continue5[chid], zoom);
-	}
-	else if(zoom > ps->zoombak5[chid] && zoom <= ps->zoombak6[chid])
-	{
-		levelFov = linear_interpolation_Fov(ps->zoombak5[chid], ps->zoombak6[chid], ps->level_Fov_continue5[chid],\
-				ps->level_Fov_continue6[chid], zoom);
-	}
-	else if(zoom > ps->zoombak6[chid] && zoom <= ps->zoombak7[chid])
-	{
-		levelFov = linear_interpolation_Fov(ps->zoombak6[chid], ps->zoombak7[chid], ps->level_Fov_continue6[chid],\
-				ps->level_Fov_continue7[chid], zoom);
-	}
-
-	return levelFov;
-}
-
-float CSensorComp::linear_interpolation_Fov(float x0, float x1, float y0, float y1, float x)
-{
-	float value, value2;
-	value = (y1 - y0) / (x1 - x0);
-	value2 = value * (x - x0) + y0;
-	return value2;
-}
-
 /************************************************************************/
 /*    boresightPosTab                                                   */
 /************************************************************************/

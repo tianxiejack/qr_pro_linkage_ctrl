@@ -80,7 +80,7 @@ int CJoystick::read_joystick_event(joy_event *jse)
     else if (bytes == sizeof(*jse))
         return 1;
 }
-
+static int mouseCtrl = false;
 void CJoystick::JoystickProcess()
 {
     int rc;
@@ -94,10 +94,16 @@ void CJoystick::JoystickProcess()
 			}
             switch(jse->type){
                 case   JS_EVENT_AXIS:
-                        procJosEvent_Axis(jse->number);
+                	if(mouseCtrl)
+                		procMouse_Axis(jse->number);
+                	else
+                		procJosEvent_Axis(jse->number);
                         break;
                 case   JS_EVENT_BUTTON:
-                        ProcJosEvent_Button(jse->number);
+                	if(mouseCtrl)
+                		procMouse_Button(jse->number);
+                	else
+                		ProcJosEvent_Button(jse->number);
                         break;
                 default:
                     printf("INFO: ERROR Jos Event, Can not excute here!!!\r\n");
@@ -110,6 +116,7 @@ bool Xinit = true;
 bool Yinit = true;
 void CJoystick::procJosEvent_Axis(UINT8  mjosNum)
 {
+	int zoom;
 	switch(mjosNum){
 			case MSGID_INPUT_AXISX:
 				if(_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_IrisAndFocusAndExit) == 0)
@@ -136,25 +143,135 @@ void CJoystick::procJosEvent_Axis(UINT8  mjosNum)
 					}
 					break;
 				case MSGID_INPUT__POVX:
-					if(jse->value == 0)
-						_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AIMPOS_X) = 0;
-					else if(jse->value == -32767)
-						_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AIMPOS_X) = 1;
+					if(jse->value == -32767)
+						josSendMsg(MSGID_EXT_INPUT_workModeSwitch);
 					else if(jse->value == 32767)
-						_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AIMPOS_X) = 2;
-
-						josSendMsg(MSGID_EXT_INPUT_AIMPOSXCTRL);
+					{
+						if(mouseCtrl)
+						{
+							mouseCtrl = false;
+							printf("joystick \n");
+						}
+						else
+						{
+							mouseCtrl = true;
+							printf("mouse \n");
+						}
+					}
 					break;
 
 				case MSGID_INPUT__POVY:
 					if(jse->value == 0)
-						_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AIMPOS_Y) = 0;
-					else if(jse->value == -32767)
-						_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AIMPOS_Y) = 1;
-					else if(jse->value == 32767)
-						_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AIMPOS_Y) = 2;
+					{
+						if(zoom)
+						{
+						_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomShort ) = 0;
+						josSendMsg(MSGID_EXT_INPUT_OPTICZOOMSHORTCTRL);
+						}
+						else
+						{
+						_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomLong ) = 0;
+						josSendMsg(MSGID_EXT_INPUT_OPTICZOOMLONGCTRL);
+						}
 
-						josSendMsg(MSGID_EXT_INPUT_AIMPOSYCTRL);
+					}
+					else if(jse->value == -32767)
+		    		{
+						_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomShort ) = 1;
+						josSendMsg(MSGID_EXT_INPUT_OPTICZOOMSHORTCTRL);
+						zoom = 1;
+		    		}
+					else if(jse->value == 32767)
+					{
+	    				_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomLong ) = 1;
+	    				josSendMsg(MSGID_EXT_INPUT_OPTICZOOMLONGCTRL);
+	    				zoom = 0;
+					}
+
+					break;
+				default:
+					break;
+	 }
+
+}
+
+void CJoystick::procMouse_Axis(UINT8  mjosNum)
+{
+	int zoom;
+	switch(mjosNum){
+			case MSGID_INPUT_AXISX:
+				_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AXISX) = jse->value;
+				if(jse->value < 0)
+				{
+					printf("光标左移 \n");
+					josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+				}
+				else if(jse->value > 0)
+				{
+					printf("光标右移 \n");
+					josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+				}
+					break;
+				case MSGID_INPUT_AXISY:
+						_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AXISY) = jse->value;
+						if(jse->value < 0)
+						{
+							printf("光标上移 \n");
+							josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+						}
+						else if(jse->value > 0)
+						{
+							printf("光标下移 \n");
+							josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+						}
+					break;
+				case MSGID_INPUT__POVX:
+					if(jse->value == -32767)
+						josSendMsg(MSGID_EXT_INPUT_workModeSwitch);
+					else if(jse->value == 32767)
+					{
+						if(mouseCtrl)
+						{
+							mouseCtrl = false;
+							printf("joystick \n");
+							josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+						}
+						else
+						{
+							mouseCtrl = true;
+							printf("mouse \n");
+							josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+						}
+					}
+					break;
+
+				case MSGID_INPUT__POVY:
+					if(jse->value == 0)
+					{
+						if(zoom)
+						{
+						_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomShort ) = 0;
+						josSendMsg(MSGID_EXT_INPUT_OPTICZOOMSHORTCTRL);
+						}
+						else
+						{
+						_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomLong ) = 0;
+						josSendMsg(MSGID_EXT_INPUT_OPTICZOOMLONGCTRL);
+						}
+
+					}
+					else if(jse->value == -32767)
+		    		{
+						_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomShort ) = 1;
+						josSendMsg(MSGID_EXT_INPUT_OPTICZOOMSHORTCTRL);
+						zoom = 1;
+		    		}
+					else if(jse->value == 32767)
+					{
+	    				_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomLong ) = 1;
+	    				josSendMsg(MSGID_EXT_INPUT_OPTICZOOMLONGCTRL);
+	    				zoom = 0;
+					}
 
 					break;
 				default:
@@ -166,49 +283,128 @@ void CJoystick::procJosEvent_Axis(UINT8  mjosNum)
 void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
 {
 	switch (njosNum) {
-    		case MSGID_INPUT_TrkCtrl:
+    		case 0x00:
     				if(jse->value == 1){
-    					//_GlobalDate->Mtd_ExitMode = Manual;
-    					josSendMsg(MSGID_EXT_INPUT_TRACKCTRL);
+    					printf("1 \n");
+    					josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     				}
     				break;
-    		case MSGID_INPUT_SensorCtrl:
+    		case 0x01:
     			if(jse->value == 1){
-    				josSendMsg(MSGID_EXT_INPUT_SwitchSensor);
+    				printf("2 \n");
+    				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     			}
     				break;
-    		case MSGID_INPUT_ZoomLong:
-    				if(jse->value == 1)
-    					_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomLong ) = 1;
-    				else
-    					_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomLong ) = 0;
-    				josSendMsg(MSGID_EXT_INPUT_OPTICZOOMLONGCTRL);
-    				break;
-    		case MSGID_INPUT_ZoomShort:
+    		case 0x02:
     			if(jse->value == 1)
-    				_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomShort ) = 1;
-    			else
-    				_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomShort ) = 0;
-    				josSendMsg(MSGID_EXT_INPUT_OPTICZOOMSHORTCTRL);
-    			break;
-    		case MSGID_INPUT_IrisAndFocusAndExit:
-    			if(jse->value == 1){
-    				_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_IrisAndFocusAndExit)  =  (_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_IrisAndFocusAndExit)  + 1) % 3;
-    				josSendMsg(MSGID_EXT_INPUT_IrisAndFocusAndExit);
+    			{
+    				printf("3 \n");
+    				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+    			}
+    				break;
+    		case 0x03:
+    			if(jse->value == 1)
+    			{
+					printf("4 \n");
+					josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     			}
     			break;
-    		case MSGID_INPUT_TrkSearch:
-    			if(jse->value == 1)
-    				_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_TrkSearch ) = 1;
-    			else
-    				_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_TrkSearch ) = 0;
-    				josSendMsg(MSGID_EXT_INPUT_TRACKSEARCHCTRL);
+    		case 0x04:
+    			if(jse->value == 1){
+    				printf("5 \n");
+    				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+    			}
     			break;
-    		case MSGID_INPUT_FuncMenu:
+    		case 0x05:
+    			if(jse->value == 1)
+    			{
+    				printf("6 \n");
+    				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+    			}
+    			break;
+    		case 0x06:
+    			if(jse->value == 1)
+    			{
+					printf("7 \n");
+					josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+    			}
+    			break;
+
+    		case 0x07:
+    			if(jse->value == 1)
+    			{
+    				printf("8 \n");
+    				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+    			}
+    			break;
+
+		case MSGID_INPUT_9:
+			if(jse->value == 1){
+				printf("9 \n");
+				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+			}
+			break;
+
+		case MSGID_INPUT_10:
+			if(jse->value == 1){
+				printf("0 \n");
+				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+			}
+			break;
+		case 10:
+			if(jse->value == 1)
+			{
+				printf("回车 \n");
+				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+			}
+			break;
+		case MSGID_INPUT_Menu:
+			if(jse->value == 1)
+			{
+				printf("菜单 \n");
+				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+			}
+			break;
+		default:
+			break;
+    }
+}
+
+void CJoystick::procMouse_Button(UINT8  njosNum)
+{
+	switch (njosNum) {
+    		case 0x00:
+    				if(jse->value == 1){
+    					printf("1 \n");
+    				}
+    				break;
+    		case 0x01:
+    			if(jse->value == 1){
+    				printf("2 \n");
+    			}
+    				break;
+    		case 0x02:
+    			if(jse->value == 1)
+    			printf("左键 \n");
+    				break;
+    		case 0x03:
+    			if(jse->value == 1)
+    			printf("右键 \n");
+    			break;
+    		case 0x04:
+    			if(jse->value == 1){
+
+    			}
+    			break;
+    		case 0x05:
+    			if(jse->value == 1)
+
+    			break;
+    		case 0x06:
 
     			break;
 
-    		case MSGID_INPUT_AxisCtrl:
+    		case 0x07:
     			if(jse->value == 1)
     			{
 
@@ -217,21 +413,22 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
 
 		case MSGID_INPUT_9:
 			if(jse->value == 1){
-				//josSendMsg(test_ptz_left);
-				josSendMsg(MSGID_EXT_INPUT_MtdPreset);
+
 			}
 			break;
 
 		case MSGID_INPUT_10:
 			if(jse->value == 1){
-				josSendMsg(MSGID_EXT_INPUT_CallPreset);
+
 			}
 			break;
+		case 0x10:
 
+			break;
 		case MSGID_INPUT_Menu:
 			if(jse->value == 1)
 			{
-				//josSendMsg(test_ptz_stop);
+
 			}
 			break;
 		default:

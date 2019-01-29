@@ -20,8 +20,6 @@ public:
     virtual void selectVideoChannel(){};
     virtual void EnableTrk(){};
     virtual void SwitchSensor(){};
-    virtual void AIMPOS_X(){};
-    virtual void AIMPOS_Y(){};
     virtual void EnableParamBackToDefault(){};
     virtual void AxisMove(){};
     virtual void EnableTrkSearch(){};

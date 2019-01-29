@@ -35,8 +35,6 @@ public:
     void selectVideoChannel();
     void EnableTrk();
     void SwitchSensor();
-    void AIMPOS_X();
-    void AIMPOS_Y();
     void EnableParamBackToDefault();
     void AxisMove();
     void EnableTrkSearch();

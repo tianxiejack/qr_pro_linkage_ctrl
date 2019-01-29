@@ -25,9 +25,6 @@ int PlatformCtrl_TrackerOutput(HPLTCTRL handle, PLATFORMCTRL_Output *pOutput);
 
 int PlatformCtrl_VirtualInput(HPLTCTRL handle, int iIndex, float fValue);
 
-int PlatformCtrl_sensorCompensation(HPLTCTRL handle);
-
-
 protected:
 
 private:

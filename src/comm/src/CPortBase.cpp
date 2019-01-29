@@ -71,41 +71,6 @@ void CPortBase::SwitchSensor()
     pM->MSGDRIV_send(MSGID_EXT_INPUT_SwitchSensor, 0);
 }
 
-void CPortBase::AIMPOS_X()
-{
-	_globalDate->EXT_Ctrl[Cmd_Mesg_AIMPOS_X]=0;
-
-    switch(_globalDate->rcvBufQue.at(5)){
-		case 0x1:
-			_globalDate->EXT_Ctrl[Cmd_Mesg_AIMPOS_X]=1;
-			break;
-		case 0x2:
-			_globalDate->EXT_Ctrl[Cmd_Mesg_AIMPOS_X]=2;
-			break;
-		default:
-			_globalDate->EXT_Ctrl[Cmd_Mesg_AIMPOS_X]=0;
-	}
-
-    pM->MSGDRIV_send(MSGID_EXT_INPUT_AIMPOSXCTRL, 0);
-}
-
-void CPortBase::AIMPOS_Y()
-{
-	_globalDate->EXT_Ctrl[Cmd_Mesg_AIMPOS_Y]=0;
-    switch(_globalDate->rcvBufQue.at(6)){
-		case 0x1:
-			_globalDate->EXT_Ctrl[Cmd_Mesg_AIMPOS_Y]=1;
-			break;
-		case 0x2:
-			_globalDate->EXT_Ctrl[Cmd_Mesg_AIMPOS_Y]=2;
-			break;
-		default:
-			_globalDate->EXT_Ctrl[Cmd_Mesg_AIMPOS_Y]=0;
-    }
-
-    pM->MSGDRIV_send(MSGID_EXT_INPUT_AIMPOSYCTRL, 0);
-}
-
 void CPortBase::EnableParamBackToDefault()
 {
 	int id = _globalDate->rcvBufQue.at(5);
@@ -437,10 +402,6 @@ int CPortBase::prcRcvFrameBufQue(int method)
                 SwitchSensor();
                 break;
             case 0x06:
-                break;
-            case 0x08:
-                AIMPOS_X();
-                AIMPOS_Y();
                 break;
             case 0x09:
                 EnableParamBackToDefault();

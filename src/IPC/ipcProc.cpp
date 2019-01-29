@@ -258,16 +258,6 @@ int CIPCProc::ipcSceneTrkCtrl(volatile unsigned char senceTrkStat)
 	test.cmd_ID = sceneTrk;
 	test.param[0]=senceTrkStat;
 	ipc_sendmsg(&test,IPC_TOIMG_MSG);
-	printf("IPC===>senceTrkStat = %d \n", senceTrkStat);
-	printf("sceneTrk  ipc send \n");
-#if 0
-	if(_GlobalDate->ScenceTrkWait)
-	{
-		printf("scene Trk is 1 \n");
-		OSA_semSignal(&_GlobalDate->m_semHndl_sceneTrk);
-	}
-	printf("sem send \n");
-#endif
 	return 0;
 }
 
@@ -431,21 +421,6 @@ int CIPCProc::IpcFuncMenu(char sign)
 	return 0;
 }
 
-int CIPCProc::IpcTrkPosMoveCtrl(POSMOVE * avtMove)
-{
-	memset(test.param, 0, PARAMLEN);
-	CMD_POSMOVE cmd_posMove;
-	test.cmd_ID = posmove;
-	{
-		cmd_posMove.AvtMoveX = avtMove->AvtMoveX;
-		cmd_posMove.AvtMoveY = avtMove->AvtMoveY;
-		memcpy(test.param, &cmd_posMove, sizeof(cmd_posMove));
-		ipc_sendmsg(&test, IPC_TOIMG_MSG);
-		//sThis->signalFeedBack(ACK_posMoveStatus, ACK_posMove_value, avtMove->AvtMoveX, avtMove->AvtMoveY);
-	}
-	return 0;
-}
-
 int CIPCProc::IpcConfig()
 {
 	memset(test.param, 0, PARAMLEN);
@@ -571,12 +546,7 @@ int CIPCProc::IPCMtdSwitch(volatile unsigned char ImgMtdStat, volatile unsigned 
 	cmd_mtd.ImgMtdStat = ImgMtdStat;
 	cmd_mtd.mtdMode = mtdMode;
 	memcpy(test.param, &cmd_mtd, sizeof(cmd_mtd));
-	printf(" IPC===> mgMtdStat = %d,   mtdMode  = %d\n", cmd_mtd.ImgMtdStat,cmd_mtd.mtdMode);
 	ipc_sendmsg(&test, IPC_TOIMG_MSG);
-#if 0
-	if(_GlobalDate->MtdWait)
-		OSA_semSignal(&_GlobalDate->m_semHndl_workMode);
-#endif
 	return 0;
 }
 

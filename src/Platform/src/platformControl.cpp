@@ -154,14 +154,6 @@ inline void CplatFormControl::PlatformCtrl_CreateParams_Init(PlatformCtrl_Create
 
 	 }
 
-int CplatFormControl::PlatformCtrl_sensorCompensation(HPLTCTRL handle)
-{
-	PlatformCtrl_Obj *pObj = (PlatformCtrl_Obj*)handle->object;
-	pObj->privates.fovX = _Sensor->ZoomFovCompensation(_GlobalDate->rcv_zoomValue);
-	pObj->privates.fovY = pObj->privates.fovX * pObj->params.sensorParams[pObj->inter.output.iSensor].fFovRatio;
-	return 0;
-}
-
 void CplatFormControl::PlatformCtrl_Delete(HPLTCTRL handle)
 {
     int i;

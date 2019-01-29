@@ -24,9 +24,7 @@ selectCh_t CGlobalDate::selectch = {1,1,1,1,1,0};
 CManager::CManager() : cfg_value(profileNum)
 {
 	sThis = this;
-#if LINKAGE_FUNC
 	exitSpeedLoop_Linkage = true;
-#endif
 	creat();
 }
 
@@ -38,7 +36,6 @@ CManager::~CManager()
 
 void CManager::creat()
 {
-	//struct timeval waitipc;
 	classObject_Creat();
 	IPC_Creat();
 	m_ipc->Create();
@@ -50,9 +47,6 @@ void CManager::creat()
 	Comm_Creat();
 	MSGAPI_Init();
 	Sem_Init();
-	//waitipc.tv_sec = 0;
-	//waitipc.tv_usec = 50000;
-	//select(0, NULL, NULL, NULL, &waitipc);
 	m_GlobalDate->chid_camera = 1;
 	m_ipc->ipc_UTC->algOsdRect_Enable = m_GlobalDate->AutoBox[m_GlobalDate->chid_camera];
 	m_ptz->Create();
@@ -78,8 +72,6 @@ void CManager::Sem_Creat()
 	OSA_semCreate(&m_GlobalDate->m_semHndl_socket, 1, 0);
 	OSA_semCreate(&m_GlobalDate->m_semHndl_socket_s, 1, 0);
 	OSA_semCreate(&m_GlobalDate->m_semHndl_automtd, 1, 0);
-	OSA_semCreate(&m_GlobalDate->m_semHndl_workMode, 1, 0);
-	OSA_semCreate(&m_GlobalDate->m_semHndl_sceneTrk, 1, 0);
 }
 
 void CManager::Sem_Init()
@@ -176,8 +168,6 @@ void CManager::Sem_destroy()
 	OSA_semDelete(&m_GlobalDate->m_semHndl_socket);
 	OSA_semDelete(&m_GlobalDate->m_semHndl_socket_s);
 	OSA_semDelete(&m_GlobalDate->m_semHndl_automtd);
-	OSA_semDelete(&m_GlobalDate->m_semHndl_workMode);
-	OSA_semDelete(&m_GlobalDate->m_semHndl_sceneTrk);
 }
 
 int CManager::GetIpcAddress(int type)
@@ -206,8 +196,6 @@ void CManager::MSGAPI_Init()
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_IrisAndFocusAndExit, MSGAPI_ExtInpuCtrl_IrisAndFocusAndExit, 0);
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_TRACKSEARCHCTRL, MSGAPI_ExtInpuCtrl_TRACKSEARCHCTRL, 0);
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_SwitchSensor, MSGAPI_ExtInpuCtrl_SwitchSensor, 0);
-	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_AIMPOSXCTRL, MSGAPI_ExtInpuCtrl_AIMPOSXCTRL, 0);
-	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_AIMPOSYCTRL, MSGAPI_ExtInpuCtrl_AIMPOSYCTRL, 0);
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_PRMBACK, MSGAPI_ExtInpuCtrl_PRMBACK, 0);
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_zoomSpeed, MSGAPI_ExtInpuCtrl_zoomSpeed, 0);
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_OPTICZOOMSHORTCTRL, MSGAPI_ExtInpuCtrl_ZOOMSHORTCTRL, 0);
@@ -221,7 +209,6 @@ void CManager::MSGAPI_Init()
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_configWrite_Save, MSGAPI_ExtInpuCtrl_configWrite_Save, 0);
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_MTDCTRL, MSGAPI_ExtInpuCtrl_MTDCTRL, 0);
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_MTDMode, MSGAPI_ExtInpuCtrl_MTDMode, 0);
-	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_sceneTrk, MSGAPI_ExtInpuCtrl_sceneTrk, 0);
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_MtdAreaBox, MSGAPI_ExtInpuCtrl_MtdAreaBox, 0);
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_MtdPreset, MSGAPI_EXT_INPUT_MtdPreset, 0);
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_CallPreset, MSGAPI_EXT_INPUT_CallPreset, 0);
@@ -231,6 +218,7 @@ void CManager::MSGAPI_Init()
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_queryPan, MSGAPI_EXT_INPUT_queryPan, 0);
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_queryTilt, MSGAPI_EXT_INPUT_queryTilt, 0);
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_queryZoom, MSGAPI_EXT_INPUT_queryZoom, 0);
+	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_workModeSwitch, MSGAPI_ExtInpuCtrl_WORKMODEWITCH, 0);
 
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_setPreset, MSGAPI_EXT_INPUT_setPreset, 0);
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_goToPreset, MSGAPI_EXT_INPUT_goToPreset, 0);
@@ -253,13 +241,11 @@ void CManager::MSGAPI_Init()
 	m_Message->MSGDRIV_register(MSGID_IPC_INPUT_ballparam, MSGAPI_IPC_ballparam, 0);
 	m_Message->MSGDRIV_register(MSGID_IPC_UserOSD, MSGAPI_IPC_UserOSDSWITCH, 0);
 
-#if LINKAGE_FUNC
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_fontsize, MSGAPI_IPC_INPUT_fontSize, 0);
 	m_Message->MSGDRIV_register(MSGID_IPC_QueryPos, MSGAPI_IPC_QueryPos, 0);
 	m_Message->MSGDRIV_register(MSGID_IPC_INPUT_PosAndZoom, MSGAPI_IPC_INPUT_PosAndZoom, 0);
 	m_Message->MSGDRIV_register(MSGID_IPC_INPUT_NameAndPos, MSGAPI_IPC_INPUT_VideoNameAndPos, 0);
-
-#endif
+	m_Message->MSGDRIV_register(MSGID_IPC_INPUT_CTRLPARAMS, MSGAPI_IPC_INPUT_CTRLPARAMS, 0);
 
 }
 
@@ -340,16 +326,6 @@ void CManager::MSGAPI_ExtInpuCtrl_SwitchSensor(long p)
 {
 	pThis->usd_API_SwitchSensor();
 	pThis->Observer_Chid();
-}
-
-void CManager::MSGAPI_ExtInpuCtrl_AIMPOSXCTRL(long p)
-{
-	pThis->usd_API_AIMPOSXCTRL();
-}
-
-void CManager::MSGAPI_ExtInpuCtrl_AIMPOSYCTRL(long p)
-{
-	pThis->usd_API_AIMPOSYCTRL();
 }
 
 void CManager::MSGAPI_ExtInpuCtrl_PRMBACK(long p)
@@ -440,12 +416,6 @@ void CManager::MSGAPI_ExtInpuCtrl_MTDCTRL(long p)
 void CManager::MSGAPI_ExtInpuCtrl_MTDMode(long p)
 {
 	pThis->usd_API_MTDMode();
-}
-
-void CManager::MSGAPI_ExtInpuCtrl_sceneTrk(long p)
-{
-	pThis->m_ipc->ipcSceneTrkCtrl(m_GlobalDate->scenetrk);
-	pThis->usd_API_StatusSwitch();
 }
 
 void CManager::MSGAPI_ExtInpuCtrl_MtdAreaBox(long p)
@@ -602,6 +572,11 @@ void CManager::MSGAPI_EXT_INPUT_queryZoom(long p)
 	pThis->signalFeedBack(ACK_zoom, ACK_zoom_value, zoom, 0);
 }
 
+void CManager::MSGAPI_ExtInpuCtrl_WORKMODEWITCH(long p)
+{
+	pThis->usd_API_WORKMODEWITCH();
+}
+
 void CManager::MSGAPI_EXT_INPUT_setPreset(long p)
 {
 	pThis->m_ptz->Preset(0x03, 1);
@@ -612,7 +587,6 @@ void CManager::MSGAPI_EXT_INPUT_goToPreset(long p)
 	pThis->m_ptz->Preset(0x07, 1);
 }
 
-#if LINKAGE_FUNC
 void CManager::MSGAPI_IPC_QueryPos(long p)
 {
 	m_GlobalDate->Sync_Query = 1;
@@ -649,7 +623,10 @@ void CManager::MSGAPI_IPC_INPUT_fontSize(long p)
 	pThis->IPC_fontSize();
 }
 
-#endif
+void CManager::MSGAPI_IPC_INPUT_CTRLPARAMS(long p)
+{
+	pThis->usd_API_ctrlParams();
+}
 
 void CManager::usd_API_AXIS()
 {
@@ -928,35 +905,6 @@ void CManager::usd_API_Resolution()
 	signalFeedBack(ACK_config_Write, ACK_config_Wblock, block, field);
 }
 
-void CManager::usd_API_AIMPOSXCTRL()
-{
-	if(m_StateManager->isTwo_PlantForm_Mtd())
-	{
-		if(m_StateManager->isThree_MtdManual())
-		{
-			int dir = m_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AIMPOS_X);
-
-			if(dir == 2)
-				m_ipc->IPCMtdSelectCtrl(Next);
-			else if(dir == 1)
-				m_ipc->IPCMtdSelectCtrl(Prev);
-		}
-	}
-	else
-	{
-		m_GlobalDate->m_avtMove.AvtMoveX = m_GlobalDate->EXT_Ctrl[Cmd_Mesg_AIMPOS_X];
-		m_ipc->IpcTrkPosMoveCtrl(&m_GlobalDate->m_avtMove);
-		//m_GlobalDate->m_avtMove.AvtMoveX = 0;
-	}
-}
-
-void CManager::usd_API_AIMPOSYCTRL()
-{
-	m_GlobalDate->m_avtMove.AvtMoveY = m_GlobalDate->EXT_Ctrl[Cmd_Mesg_AIMPOS_Y];
-	m_ipc->IpcTrkPosMoveCtrl(&m_GlobalDate->m_avtMove);
-	m_GlobalDate->m_avtMove.AvtMoveY = 0;
-}
-
 void CManager::usd_API_PRMBACK()
 {
 	int status , block;
@@ -1161,6 +1109,28 @@ void CManager::usd_API_queryPos()
 	m_GlobalDate->Mtd_Moitor = 1; //The flag used save default position
 	while(m_GlobalDate->sync_pos)
 		m_ptz->QueryPos();
+}
+
+void CManager::usd_API_WORKMODEWITCH()
+{
+	m_GlobalDate->workMode = (m_GlobalDate->workMode + 1)%3;
+	switch(m_GlobalDate->workMode)
+	{
+	case 0x00:
+		printf("手动联动 \n");
+		break;
+	case 0x01:
+		printf("自动联动 \n");
+		break;
+	case 0x02:
+		printf("单控球机 \n");
+		break;
+	}
+}
+
+void CManager::usd_API_ctrlParams()
+{
+	printf("ctrl params  \n");
 }
 
 void CManager::Observer_Action(int block, int field, float value)
@@ -1565,118 +1535,6 @@ void CManager::usd_API_switchCameraFovAndLV(char chid)
 	}
 }
 
-void CManager::usd_API_fovCompensation()
-{
-	m_GlobalDate->sync_fovComp = 1;
-	PLATFORMCTRL_Interface* pcfg;
-	pcfg = m_plt;
-	PlatformCtrl_Obj *pObj =  (PlatformCtrl_Obj*)pcfg->object;
-	while(m_GlobalDate->sync_fovComp)
-	{
-		m_ptz->QueryZoom();
-	}
-	m_Platform->PlatformCtrl_sensorCompensation(m_plt);
-	int x = dynamicSendBoresightPosX(m_GlobalDate->rcv_zoomValue);
-	int y = dynamicSendBoresightPosY(m_GlobalDate->rcv_zoomValue);
-	pObj->params.sensorParams[1].defaultBoresightPos_x = x;
-	pObj->params.sensorParams[1].defaultBoresightPos_y = y;
-	m_ipc->IPCBoresightPosCtrl(x, y);
-	printf("x = %d   y =%d  \n", x, y);
-}
-
-float CManager::linear_interpolation_Y(float x0, float x1, float y0, float y1,unsigned short x)
-{
-	float value, value2;
-	value = (y1 - y0) / (x1 - x0);
-	value2 = value * (x - x0) + y0;
-	return value2;
-}
-
-float CManager::linear_interpolation_X(float x0, float x1, float y0, float y1, unsigned short x)
-{
-	float value, value2;
-	value = (y1 - y0) / (x1 - x0);
-	value2 = value * (x - x0) + y0;
-	return value2;
-}
-
-float CManager::dynamicSendBoresightPosY(unsigned short zoom)
-{
-	int chid = m_GlobalDate->chid_camera;
-	float bPosy;
-	if(zoom >= viewParam.zoombak1[chid] && zoom <= viewParam.zoombak2[chid])
-	{
-		bPosy = linear_interpolation_Y(viewParam.zoombak1[chid],viewParam.zoombak2[chid],\
-				viewParam.Boresightpos_continue_y1[chid],viewParam.Boresightpos_continue_y2[chid],zoom);
-	}
-	else if(zoom > viewParam.zoombak2[chid] && zoom <= viewParam.zoombak3[chid])
-	{
-		bPosy = linear_interpolation_Y(viewParam.zoombak2[chid], viewParam.zoombak3[chid],\
-				viewParam.Boresightpos_continue_y2[chid],viewParam.Boresightpos_continue_y3[chid],zoom);
-	}
-	else if(zoom > viewParam.zoombak3[chid] && zoom <= viewParam.zoombak4[chid])
-	{
-		bPosy = linear_interpolation_Y(viewParam.zoombak3[chid],viewParam.zoombak4[chid],\
-				viewParam.Boresightpos_continue_y3[chid],viewParam.Boresightpos_continue_y4[chid],zoom);
-	}
-	else if(zoom > viewParam.zoombak4[chid] && zoom <= viewParam.zoombak5[chid])
-	{
-		bPosy = linear_interpolation_Y(viewParam.zoombak4[chid],viewParam.zoombak5[chid],\
-				viewParam.Boresightpos_continue_y4[chid],viewParam.Boresightpos_continue_y5[chid],zoom);
-	}
-	else if(zoom > viewParam.zoombak5[chid] && zoom <= viewParam.zoombak6[chid])
-	{
-		bPosy = linear_interpolation_Y(viewParam.zoombak5[chid],viewParam.zoombak6[chid],\
-				viewParam.Boresightpos_continue_y5[chid],viewParam.Boresightpos_continue_y6[chid],zoom);
-	}
-	else if(zoom > viewParam.zoombak6[chid] && zoom <= viewParam.zoombak7[chid])
-	{
-		bPosy = linear_interpolation_Y( viewParam.zoombak6[chid], viewParam.zoombak7[chid],\
-				viewParam.Boresightpos_continue_y6[chid],viewParam.Boresightpos_continue_y7[chid],zoom);
-	}
-	return bPosy;
-}
-
-float CManager::dynamicSendBoresightPosX(unsigned short zoom)
-{
-	int chid = m_GlobalDate->chid_camera;
-	float bPosx;
-	printf("zoom = %d \n", zoom);
-	if(zoom >= viewParam.zoombak1[chid] && zoom <= viewParam.zoombak2[chid])
-	{
-		bPosx = linear_interpolation_X(viewParam.zoombak1[chid],viewParam.zoombak2[chid],\
-				viewParam.Boresightpos_continue_x1[chid],viewParam.Boresightpos_continue_x2[chid],zoom);
-	}
-	else if(zoom > viewParam.zoombak2[chid] && zoom <= viewParam.zoombak3[chid])
-	{
-		bPosx = linear_interpolation_X(viewParam.zoombak2[chid],viewParam.zoombak3[chid],\
-				viewParam.Boresightpos_continue_x2[chid],viewParam.Boresightpos_continue_x3[chid],zoom);
-	}
-	else if(zoom > viewParam.zoombak3[chid] && zoom <= viewParam.zoombak4[chid])
-	{
-		bPosx = linear_interpolation_X(viewParam.zoombak3[chid],viewParam.zoombak4[chid],\
-				viewParam.Boresightpos_continue_x3[chid],viewParam.Boresightpos_continue_x4[chid],zoom);
-	}
-	else if(zoom > viewParam.zoombak4[chid] && zoom <= viewParam.zoombak5[chid])
-	{
-		bPosx = linear_interpolation_X(viewParam.zoombak4[chid],viewParam.zoombak5[chid],\
-				viewParam.Boresightpos_continue_x4[chid],viewParam.Boresightpos_continue_x5[chid],zoom);
-	}
-	else if(zoom > viewParam.zoombak5[chid] && zoom <= viewParam.zoombak6[chid])
-	{
-		bPosx = linear_interpolation_X(viewParam.zoombak5[chid],viewParam.zoombak6[chid],\
-				viewParam.Boresightpos_continue_x5[chid],viewParam.Boresightpos_continue_x6[chid],zoom);
-	}
-	else if(zoom > viewParam.zoombak6[chid] && zoom <= viewParam.zoombak7[chid])
-	{
-		bPosx = linear_interpolation_X(viewParam.zoombak6[chid],viewParam.zoombak7[chid],\
-				viewParam.Boresightpos_continue_x6[chid],viewParam.Boresightpos_continue_x7[chid],zoom);
-	}
-
-	return bPosx;
-}
-
-#if LINKAGE_FUNC
 void CManager::thrCreate_LinkageSpeedLoop()
 {
 	exitSpeedLoop_Linkage = false;
@@ -1689,7 +1547,6 @@ void CManager::thrDelete_LinkageSpeedLoop()
 	OSA_semSignal(&m_GlobalDate->m_semHndl_automtd);
 	OSA_thrDelete(&Linkage_SpeedLoop);
 }
-#endif
 
 void CManager::usd_API_MTDMode()
 {
@@ -1791,9 +1648,6 @@ void CManager::usd_API_IPC_TRACKCTRL()
 {
 	int TrkStat;
 	struct timeval tmp;
-	if(m_GlobalDate->scenetrk)
-		TrkStat = m_ipc->trackstatus;
-		else
 		TrkStat = GetIpcAddress(Trk);
 		/*target lost Auto exit */
 	m_GlobalDate->avtStatus = TrkStat;
@@ -9128,16 +8982,9 @@ void CManager::MSGAPI_ExtInputCtrl_ZoomLong()
 		m_ptz->m_iSetZoomSpeed = 0;
 	struct timeval tmp;
 	tmp.tv_sec = 0;
-	tmp.tv_usec = 400000;
+	tmp.tv_usec = 60000;
 	select(0, NULL, NULL, NULL, &tmp);
-	if(m_ptz->m_iSetZoomSpeed == 0)
-	{
-		pThis->usd_API_fovCompensation();
-
-#if LINKAGE_FUNC
-				pThis->refreshPtzParam();
-#endif
-	}
+	refreshPtzParam();
 }
 
 void CManager::MSGAPI_ExtInputCtrl_ZoomShort()
@@ -9148,15 +8995,9 @@ void CManager::MSGAPI_ExtInputCtrl_ZoomShort()
 		m_ptz->m_iSetZoomSpeed = 0;
 	struct timeval tmp;
 	tmp.tv_sec = 0;
-	tmp.tv_usec = 400000;
+	tmp.tv_usec = 60000;
 	select(0, NULL, NULL, NULL, &tmp);
-	if(m_ptz->m_iSetZoomSpeed == 0)
-	{
-		pThis->usd_API_fovCompensation();
-#if LINKAGE_FUNC
-		pThis->refreshPtzParam();
-#endif
-	}
+	refreshPtzParam();
 }
 
 void CManager::MSGAPI_ExtInputCtrl_IrisDown()

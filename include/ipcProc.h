@@ -42,7 +42,6 @@ public:
 		    int IpcAcqDoorCtrl(AcqBoxSize *BoxSize);
 		    int IpcIrisAndFocus(osd_triangle* osd_tri, char sign);
 		    int IpcFuncMenu(char sign);
-		    int IpcTrkPosMoveCtrl(POSMOVE * avtMove);
 		    int IPCBoresightPosCtrl(unsigned int x,unsigned int y);
 		    int IpcElectronicZoom(int zoom);
 		    int IpcConfig();
