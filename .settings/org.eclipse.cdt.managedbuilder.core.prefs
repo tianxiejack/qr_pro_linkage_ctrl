@@ -1,0 +1,13 @@
+eclipse.preferences.version=1
+environment/buildEnvironmentInclude/com.nvidia.cuda.ide.seven_five.configuration.debug.738514130/CPATH/delimiter=\:
+environment/buildEnvironmentInclude/com.nvidia.cuda.ide.seven_five.configuration.debug.738514130/CPATH/operation=remove
+environment/buildEnvironmentInclude/com.nvidia.cuda.ide.seven_five.configuration.debug.738514130/CPLUS_INCLUDE_PATH/delimiter=\:
+environment/buildEnvironmentInclude/com.nvidia.cuda.ide.seven_five.configuration.debug.738514130/CPLUS_INCLUDE_PATH/operation=remove
+environment/buildEnvironmentInclude/com.nvidia.cuda.ide.seven_five.configuration.debug.738514130/append=true
+environment/buildEnvironmentInclude/com.nvidia.cuda.ide.seven_five.configuration.debug.738514130/appendContributed=true
+environment/buildEnvironmentInclude/com.nvidia.cuda.ide.seven_five.configuration.release.1318047084/CPATH/delimiter=\:
+environment/buildEnvironmentInclude/com.nvidia.cuda.ide.seven_five.configuration.release.1318047084/CPATH/operation=remove
+environment/buildEnvironmentInclude/com.nvidia.cuda.ide.seven_five.configuration.release.1318047084/CPLUS_INCLUDE_PATH/delimiter=\:
+environment/buildEnvironmentInclude/com.nvidia.cuda.ide.seven_five.configuration.release.1318047084/CPLUS_INCLUDE_PATH/operation=remove
+environment/buildEnvironmentInclude/com.nvidia.cuda.ide.seven_five.configuration.release.1318047084/append=true
+environment/buildEnvironmentInclude/com.nvidia.cuda.ide.seven_five.configuration.release.1318047084/appendContributed=true
