@@ -363,10 +363,8 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
 				jos_params.type = enter;
 				jos_params.enter = true;
 				printf("回车 \n");
-			}
-			else
-				jos_params.enter = false;
 				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+			}
 			break;
 		case MSGID_INPUT_Menu:
 			if(jse->value == 1)

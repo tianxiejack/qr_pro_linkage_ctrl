@@ -120,8 +120,8 @@
 									<listOptionValue builtIn="false" value="../src/GPIO"/>
 								</option>
 								<option id="nvcc.compiler.def.symbols.1533606469" name="Defined symbols (-D)" superClass="nvcc.compiler.def.symbols" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="LINKAGE_FUNC=1"/>
-									<listOptionValue builtIn="false" value="TRACK_FUNC=0"/>
+									<listOptionValue builtIn="false" value=""/>
+									<listOptionValue builtIn="false" value=""/>
 								</option>
 								<inputType id="nvcc.compiler.input.cu.1318138838" superClass="nvcc.compiler.input.cu"/>
 								<inputType id="nvcc.compiler.input.cpp.1820290944" superClass="nvcc.compiler.input.cpp"/>

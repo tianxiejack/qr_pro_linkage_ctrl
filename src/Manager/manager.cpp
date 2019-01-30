@@ -156,9 +156,7 @@ void CManager::Tcallback_Linkage(void *p)
 
 void CManager::destroy()
 {
-#if LINKAGE_FUNC
 	thrDelete_LinkageSpeedLoop();
-#endif
 }
 
 void CManager::Sem_destroy()
@@ -1567,11 +1565,8 @@ void CManager::usd_API_MTDMode()
 				m_StateManager->two_State_PlantForm_Mtd();
 				usd_API_Track();
 			}
-
-	#if LINKAGE_FUNC
 			pThis->dtimer.stopTimer(pThis->swtarget_id);
 			m_GlobalDate->MtdAutoLoop = false;
-	#endif
 		}
 		else
 		{
@@ -1587,21 +1582,12 @@ void CManager::usd_API_MTDMode()
 			}
 			else
 			{
-#if TRACK_FUNC
-				m_ptz->ptzSetPos(m_GlobalDate->Mtd_Moitor_X, m_GlobalDate->Mtd_Moitor_Y);
-				struct timeval tmp;
-				tmp.tv_sec = 1;
-				tmp.tv_usec = 0;
-				select(0, NULL, NULL, NULL, &tmp);
-#endif
 				m_StateManager->three_State_MtdAuto();
-#if LINKAGE_FUNC
 		if(exitSpeedLoop_Linkage)
 			thrCreate_LinkageSpeedLoop();
 		m_GlobalDate->MtdAutoLoop = true;
 		dtimer.startTimer(swtarget_id, m_GlobalDate->mtdconfig.trktime);
 		printf("start time  = %d \n", m_GlobalDate->mtdconfig.trktime);
-#endif
 			}
 
 		}

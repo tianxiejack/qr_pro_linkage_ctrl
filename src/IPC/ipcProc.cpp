@@ -140,25 +140,7 @@ void CIPCProc::getIPCMsgProc()
      			memcpy(&_GlobalDate->ipc_mouseptz, &fr_img_test.param, sizeof(cmd_mouseptz));
      			_Message->MSGDRIV_send(MSGID_EXT_INPUT_PLATCTRL, 0);
      			break;
-#if TRACK_FUNC
-     		case mtdnum:
-     			_GlobalDate->Mtd_Manual_Limit = 0;
-     			_GlobalDate->Mtd_ipc_target = fr_img_test.param[0];
-     			if(_GlobalDate->mtdMode == 1 && _GlobalDate->Mtd_ipc_target == 1 && _GlobalDate->Mtd_Limit == recv_AutoMtdDate)
-     			{
-     				printf("ipc == > target =  %d  \n",  _GlobalDate->Mtd_ipc_target);
-     				_Message->MSGDRIV_send(MSGID_IPC_AutoMtd, 0);
-     				_GlobalDate->Mtd_Limit = shield_AutoMtdDate;
-     			}
-     			else if(_GlobalDate->mtdMode == 0)
-     			{
-     				if(_GlobalDate->Mtd_ipc_target)
-     					_GlobalDate->Mtd_Manual_Limit = 1;
-     				else
-     					_GlobalDate->Mtd_Manual_Limit = 0;
-     			}
-     		break;
-#endif
+
      		case mtdredetect:		/*46:针对移动检测，跟丢后是否回到固定位置再次检测*/
      			if(_GlobalDate->ImgMtdStat)
      				_GlobalDate->mtdconfig.preset = fr_img_test.param[0];
@@ -185,7 +167,6 @@ void CIPCProc::getIPCMsgProc()
      		//	printf("IPC  ==>  trackposx = %f,   trackposy = %f,     trackstatus  = %d \n", trackposx, trackposy, trackstatus);
      			break;
 
-#if LINKAGE_FUNC
      		case querypos:				/*Send Pos to img */
      			_Message->MSGDRIV_send(MSGID_IPC_QueryPos, 0);
      			break;
@@ -222,8 +203,6 @@ void CIPCProc::getIPCMsgProc()
      		case josctrl:
      			memcpy(&josParams, &fr_img_test.param, sizeof(josParams));
      			break;
-
-#endif
 
 		case setconfig:
 			CMD_SETCONFIG recvconfig;
