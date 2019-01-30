@@ -55,7 +55,6 @@ private:
 	joy_event *jse;
 	static bool JosStart;
 	int joystick_fd;
-	ctrlParams jos_params;
 	const char*  joystick_Dev = "/dev/input/js0";
 
 	int  Run();

@@ -9,7 +9,7 @@ CGlobalDate* CJoystick::_GlobalDate = 0;
 CStatusManager* CJoystick::_StatusManager = 0;
 
 bool CJoystick::JosStart = true;
-
+extern ctrlParams jos_params;
 CJoystick::CJoystick()
 {
 	jse = NULL;
@@ -17,6 +17,8 @@ CJoystick::CJoystick()
 	_StatusManager = CStatusManager::Instance();
 	_GlobalDate = CGlobalDate::Instance();
 	_Message = CMessage::getInstance();
+	memset(&jos_params, 0, sizeof(jos_params));
+	jos_params.ctrlMode = jos;
 }
 
 CJoystick::~CJoystick()
@@ -175,6 +177,8 @@ void CJoystick::procJosEvent_Axis(UINT8  mjosNum)
 							jos_params.ctrlMode = mouse;
 						josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 					}
+					else
+						jos_params.type = 0;
 					break;
 
 				case MSGID_INPUT__POVY:
@@ -221,11 +225,15 @@ void CJoystick::procMouse_Axis(UINT8  mjosNum)
 					jos_params.cursor_x = JosToWinX(jse->value, video_gaoqing);
 					printf("光标左移 \n");
 					josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+					if(!jse->value)
+						jos_params.type = 0;
 					break;
 				case MSGID_INPUT_AXISY:
 						jos_params.cursor_y = JosToWinY(jse->value, video_gaoqing);
 						printf("光标上移 \n");
 						josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+						if(!jse->value)
+							jos_params.type = 0;
 					break;
 				case MSGID_INPUT__POVX:
 					if(jse->value == -32767)
@@ -238,6 +246,8 @@ void CJoystick::procMouse_Axis(UINT8  mjosNum)
 							jos_params.ctrlMode = mouse;
 						josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 					}
+					else
+							jos_params.type = 0;
 					break;
 
 				case MSGID_INPUT__POVY:
@@ -277,7 +287,7 @@ void CJoystick::procMouse_Axis(UINT8  mjosNum)
 
 void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
 {
-	switch (njosNum) {
+	switch (njosNum){
 		jos_params.type = jos_button;
     		case 0x00:
     				if(jse->value == 1){
@@ -352,6 +362,7 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
 
 		case MSGID_INPUT_10:
 			if(jse->value == 1){
+				jos_params.type = jos_button;
 				jos_params.jos_button = 0;
 				printf("0 \n");
 				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
@@ -365,18 +376,23 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
 				printf("回车 \n");
 				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 			}
+			else
+				jos_params.type = 0;
 			break;
 		case MSGID_INPUT_Menu:
 			if(jse->value == 1)
 			{
 				jos_params.type = jos_menu;
-				jos_params.menu = true;
+				if(!jos_params.menu)
+					jos_params.menu = true;
+				else
+					jos_params.menu = false;
+				printf("jos_params.menu = %d \n", jos_params.menu);
+				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 				printf("菜单 \n");
 			}
 			else
-				jos_params.menu = false;
-				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
-
+				jos_params.type = 0;
 			break;
 		default:
 			break;
