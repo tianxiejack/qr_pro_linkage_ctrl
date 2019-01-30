@@ -219,6 +219,10 @@ void CIPCProc::getIPCMsgProc()
      				_GlobalDate->mtdMode = fr_img_test.param[0];
      			_Message->MSGDRIV_send(MSGID_EXT_INPUT_MTDMode, 0);
      			break;
+     		case josctrl:
+     			memcpy(&josParams, &fr_img_test.param, sizeof(josParams));
+     			break;
+
 #endif
 
 		case setconfig:
@@ -506,6 +510,15 @@ int CIPCProc::IPCSendBallParam()
 	test.cmd_ID = ballbaud;
 	memcpy(test.param, &_GlobalDate->m_uart_params[chid].balladdress, sizeof(_GlobalDate->m_uart_params[chid].balladdress));
 	memcpy(&test.param[4], &_GlobalDate->m_uart_params[chid].baudrate, sizeof(_GlobalDate->m_uart_params[chid].baudrate));
+	ipc_sendmsg(&test, IPC_TOIMG_MSG);
+	return 0;
+}
+
+int CIPCProc::ipcSendJosParams()
+{
+	memset(test.param, 0, PARAMLEN);
+	test.cmd_ID = josctrl;
+	memcpy(&test.param,&josParams , sizeof(josParams));
 	ipc_sendmsg(&test, IPC_TOIMG_MSG);
 	return 0;
 }

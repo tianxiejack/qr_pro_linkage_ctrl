@@ -1114,16 +1114,17 @@ void CManager::usd_API_queryPos()
 void CManager::usd_API_WORKMODEWITCH()
 {
 	m_GlobalDate->workMode = (m_GlobalDate->workMode + 1)%3;
+	m_ipc->josParams.type = workMode;
 	switch(m_GlobalDate->workMode)
 	{
-	case 0x00:
-		printf("手动联动 \n");
-		break;
 	case 0x01:
-		printf("自动联动 \n");
+		m_ipc->josParams.workMode = manual_linkage;
 		break;
 	case 0x02:
-		printf("单控球机 \n");
+		m_ipc->josParams.workMode = Auto_linkage;
+		break;
+	case 0x03:
+		m_ipc->josParams.workMode = ballctrl;
 		break;
 	}
 	usd_API_ctrlParams();
@@ -1131,7 +1132,7 @@ void CManager::usd_API_WORKMODEWITCH()
 
 void CManager::usd_API_ctrlParams()
 {
-	printf("ctrl params  \n");
+	m_ipc->ipcSendJosParams();
 }
 
 void CManager::Observer_Action(int block, int field, float value)

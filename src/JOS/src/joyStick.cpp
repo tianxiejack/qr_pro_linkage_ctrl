@@ -80,7 +80,7 @@ int CJoystick::read_joystick_event(joy_event *jse)
     else if (bytes == sizeof(*jse))
         return 1;
 }
-static int mouseCtrl = false;
+
 void CJoystick::JoystickProcess()
 {
     int rc;
@@ -94,13 +94,13 @@ void CJoystick::JoystickProcess()
 			}
             switch(jse->type){
                 case   JS_EVENT_AXIS:
-                	if(mouseCtrl)
+                	if(jos_params.ctrlMode == mouse)
                 		procMouse_Axis(jse->number);
                 	else
                 		procJosEvent_Axis(jse->number);
                         break;
                 case   JS_EVENT_BUTTON:
-                	if(mouseCtrl)
+                	if(jos_params.ctrlMode == mouse)
                 		procMouse_Button(jse->number);
                 	else
                 		ProcJosEvent_Button(jse->number);
@@ -127,6 +127,17 @@ void CJoystick::procJosEvent_Axis(UINT8  mjosNum)
 				_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AXISX) = jse->value;
 				josSendMsg(MSGID_EXT_INPUT_PLATCTRL);
 				}
+				else if(jos_params.menu)
+				{
+					jos_params.type = jos_Dir;
+					if(jse->value < 0)
+						jos_params.jos_Dir = cursor_left;
+					else if(jse->value > 0)
+						jos_params.jos_Dir = cursor_right;
+					else
+						jos_params.jos_Dir = 0;
+				}
+
 					break;
 				case MSGID_INPUT_AXISY:
 					if(_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_IrisAndFocusAndExit) == 0)
@@ -136,6 +147,16 @@ void CJoystick::procJosEvent_Axis(UINT8  mjosNum)
 						Yinit = false;
 						_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AXISY) = jse->value;
 						josSendMsg(MSGID_EXT_INPUT_PLATCTRL);
+					}
+					else if(jos_params.menu)
+					{
+						jos_params.type = jos_Dir;
+						if(jse->value < 0)
+							jos_params.jos_Dir = cursor_up;
+						else if(jse->value > 0)
+							jos_params.jos_Dir = cursor_down;
+						else
+							jos_params.jos_Dir = 0;
 					}
 					else {
 						Y_CtrlIrisAndFocus(jse->value);
@@ -147,16 +168,11 @@ void CJoystick::procJosEvent_Axis(UINT8  mjosNum)
 						josSendMsg(MSGID_EXT_INPUT_workModeSwitch);
 					else if(jse->value == 32767)
 					{
-						if(mouseCtrl)
-						{
-							mouseCtrl = false;
-							printf("joystick \n");
-						}
-						else
-						{
-							mouseCtrl = true;
-							printf("mouse \n");
-						}
+						jos_params.type = ctrlMode;
+						if(jos_params.ctrlMode == mouse)
+							jos_params.ctrlMode = jos;
+						else if(jos_params.ctrlMode == jos)
+							jos_params.ctrlMode = mouse;
 						josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 					}
 					break;
@@ -200,47 +216,26 @@ void CJoystick::procMouse_Axis(UINT8  mjosNum)
 {
 	int zoom;
 	switch(mjosNum){
-			case MSGID_INPUT_AXISX:
-				_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AXISX) = jse->value;
-				if(jse->value < 0)
-				{
+				case MSGID_INPUT_AXISX:
+					jos_params.type = cursor_move;
+					jos_params.cursor_x = JosToWinX(jse->value, video_gaoqing);
 					printf("光标左移 \n");
 					josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
-				}
-				else if(jse->value > 0)
-				{
-					printf("光标右移 \n");
-					josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
-				}
 					break;
 				case MSGID_INPUT_AXISY:
-						_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AXISY) = jse->value;
-						if(jse->value < 0)
-						{
-							printf("光标上移 \n");
-							josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
-						}
-						else if(jse->value > 0)
-						{
-							printf("光标下移 \n");
-							josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
-						}
+						jos_params.cursor_y = JosToWinY(jse->value, video_gaoqing);
+						printf("光标上移 \n");
+						josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 					break;
 				case MSGID_INPUT__POVX:
 					if(jse->value == -32767)
 						josSendMsg(MSGID_EXT_INPUT_workModeSwitch);
 					else if(jse->value == 32767)
 					{
-						if(mouseCtrl)
-						{
-							mouseCtrl = false;
-							printf("joystick \n");
-						}
-						else
-						{
-							mouseCtrl = true;
-							printf("mouse \n");
-						}
+						if(jos_params.ctrlMode == mouse)
+							jos_params.ctrlMode = jos;
+						else if((jos_params.ctrlMode == mouse))
+							jos_params.ctrlMode = mouse;
 						josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 					}
 					break;
@@ -283,14 +278,17 @@ void CJoystick::procMouse_Axis(UINT8  mjosNum)
 void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
 {
 	switch (njosNum) {
+		jos_params.type = jos_button;
     		case 0x00:
     				if(jse->value == 1){
+    					jos_params.jos_button = 1;
     					printf("1 \n");
     					josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     				}
     				break;
     		case 0x01:
     			if(jse->value == 1){
+    				jos_params.jos_button = 2;
     				printf("2 \n");
     				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     			}
@@ -298,6 +296,7 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
     		case 0x02:
     			if(jse->value == 1)
     			{
+    				jos_params.jos_button = 3;
     				printf("3 \n");
     				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     			}
@@ -305,12 +304,14 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
     		case 0x03:
     			if(jse->value == 1)
     			{
+    				jos_params.jos_button = 4;
 					printf("4 \n");
 					josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     			}
     			break;
     		case 0x04:
     			if(jse->value == 1){
+    				jos_params.jos_button = 5;
     				printf("5 \n");
     				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     			}
@@ -318,6 +319,7 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
     		case 0x05:
     			if(jse->value == 1)
     			{
+    				jos_params.jos_button = 6;
     				printf("6 \n");
     				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     			}
@@ -325,6 +327,7 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
     		case 0x06:
     			if(jse->value == 1)
     			{
+    				jos_params.jos_button = 7;
 					printf("7 \n");
 					josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     			}
@@ -333,6 +336,7 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
     		case 0x07:
     			if(jse->value == 1)
     			{
+    				jos_params.jos_button = 8;
     				printf("8 \n");
     				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     			}
@@ -340,6 +344,7 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
 
 		case MSGID_INPUT_9:
 			if(jse->value == 1){
+				jos_params.jos_button = 9;
 				printf("9 \n");
 				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 			}
@@ -347,6 +352,7 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
 
 		case MSGID_INPUT_10:
 			if(jse->value == 1){
+				jos_params.jos_button = 0;
 				printf("0 \n");
 				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 			}
@@ -354,16 +360,25 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
 		case 10:
 			if(jse->value == 1)
 			{
+				jos_params.type = enter;
+				jos_params.enter = true;
 				printf("回车 \n");
-				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 			}
+			else
+				jos_params.enter = false;
+				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 			break;
 		case MSGID_INPUT_Menu:
 			if(jse->value == 1)
 			{
+				jos_params.type = jos_menu;
+				jos_params.menu = true;
 				printf("菜单 \n");
-				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 			}
+			else
+				jos_params.menu = false;
+				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+
 			break;
 		default:
 			break;
@@ -382,18 +397,33 @@ void CJoystick::procMouse_Button(UINT8  njosNum)
     			}
     				break;
     		case 0x02:
+				jos_params.type = mouse_button;
     			if(jse->value == 1)
     			{
-    			printf("左键 \n");
-    			josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+    				printf("左键 按下\n");
+    				jos_params.mouse_button = 3;
+    				jos_params.mouse_state = true;
     			}
+    			else{
+    				printf("左键抬起 \n");
+    				jos_params.mouse_button = 3;
+    				jos_params.mouse_state = false;
+    			}
+    			josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     				break;
     		case 0x03:
+    			jos_params.type = mouse_button;
     			if(jse->value == 1)
     			{
-    			printf("右键 \n");
-    			josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+    			printf("右键 按下\n");
+				jos_params.mouse_button = 4;
+				jos_params.mouse_state = true;
     			}
+    			else{
+    				jos_params.mouse_button = 4;
+    				jos_params.mouse_state = false;
+    			}
+    			josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     			break;
     		case 0x04:
     			if(jse->value == 1){

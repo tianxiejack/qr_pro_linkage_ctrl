@@ -3,7 +3,7 @@
 
 #include "osa_thr.h"
 #include "Ipcctl.h"
-#include   "globalDate.h"
+#include  "globalDate.h"
 #include <string>
 #define n_size 32
 #pragma once
@@ -67,6 +67,7 @@ public:
 			int IPCSendPos(int pan, int tilt, int zoom);
 			int refreshPtzParam(int pan, int tilt, int zoom);
 			int IPCSendBallParam();
+			int ipcSendJosParams();
 
 
 		    IMGSTATUS  *getAvtStatSharedMem();
@@ -87,6 +88,7 @@ public:
 			  	CMD_TRKDOOR fr_img_cmd_trkdoor;
 			  	CMD_MOUSEPTZ cmd_mouseptz;
 			  	CMD_Mtd_Frame Mtd_Frame;
+			  	ctrlParams josParams;
 			  	CMD_Mtd_Frame* pMtd;
 
 

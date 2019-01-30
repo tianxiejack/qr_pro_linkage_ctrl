@@ -178,8 +178,6 @@ typedef struct camera_Pos
 	unsigned short setzoom;
 }camera_PosParams;
 
-
-
 class CGlobalDate
 {
 public:
@@ -213,6 +211,7 @@ IMGSTATUS  avt_status;
 MOUSEPTZ ipc_mouseptz;
 MtdConfig mtdconfig;
 LinkageParam linkagePos;
+ctrlParams josParams;
 G_uart_open_params m_uart_params[5];
 camera_PosParams m_camera_pos[5];
 

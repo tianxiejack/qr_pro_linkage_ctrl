@@ -14,6 +14,7 @@
 #include "globalDate.h"
 #include "CMessage.hpp"
 #include "stateCtrl.h"
+#include "ipcProc.h"
 
 
 const char  JS_EVENT_BUTTON = 0x01;
@@ -54,6 +55,7 @@ private:
 	joy_event *jse;
 	static bool JosStart;
 	int joystick_fd;
+	ctrlParams jos_params;
 	const char*  joystick_Dev = "/dev/input/js0";
 
 	int  Run();
