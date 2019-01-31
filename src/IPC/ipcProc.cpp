@@ -8,7 +8,6 @@
 CIPCProc* CIPCProc::pThis = 0;
 
 CGlobalDate* CIPCProc::_GlobalDate = 0;
-ctrlParams jos_params;
 
 CIPCProc::CIPCProc()
 {
@@ -202,7 +201,7 @@ void CIPCProc::getIPCMsgProc()
      			_Message->MSGDRIV_send(MSGID_EXT_INPUT_MTDMode, 0);
      			break;
      		case josctrl:
-     			memcpy(&jos_params, &fr_img_test.param, sizeof(jos_params));
+     			_GlobalDate->jos_params.menu = fr_img_test.param[32];
      			break;
 
 		case setconfig:
@@ -498,7 +497,9 @@ int CIPCProc::ipcSendJosParams()
 {
 	memset(test.param, 0, PARAMLEN);
 	test.cmd_ID = josctrl;
-	memcpy(&test.param,&jos_params , sizeof(jos_params));
+	memcpy(test.param,&_GlobalDate->jos_params , sizeof(_GlobalDate->jos_params));
+	printf("sizeof = %d \n", sizeof(_GlobalDate->jos_params));
+	printf(" [IPC] _GlobalDate->jos_params.ctrlMode = %d \n", _GlobalDate->jos_params.ctrlMode);
 	ipc_sendmsg(&test, IPC_TOIMG_MSG);
 	return 0;
 }
