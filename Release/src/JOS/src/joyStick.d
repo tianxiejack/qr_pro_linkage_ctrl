@@ -171,5 +171,4 @@ src/JOS/src/joyStick.o : ../src/JOS/src/joyStick.cpp \
     /usr/include/assert.h \
     ../src/OSA_CAP/inc/osa_sem.h \
     ../include/Ipcctl.h \
-    ../src/stateCtrl/stateCtrl.h \
-    ../include/ipcProc.h
+    ../src/stateCtrl/stateCtrl.h

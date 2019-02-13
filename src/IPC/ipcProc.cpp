@@ -498,8 +498,6 @@ int CIPCProc::ipcSendJosParams()
 	memset(test.param, 0, PARAMLEN);
 	test.cmd_ID = josctrl;
 	memcpy(test.param,&_GlobalDate->jos_params , sizeof(_GlobalDate->jos_params));
-	printf("sizeof = %d \n", sizeof(_GlobalDate->jos_params));
-	printf(" [IPC] _GlobalDate->jos_params.ctrlMode = %d \n", _GlobalDate->jos_params.ctrlMode);
 	ipc_sendmsg(&test, IPC_TOIMG_MSG);
 	return 0;
 }

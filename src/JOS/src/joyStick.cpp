@@ -299,14 +299,12 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
     		case 0x00:
     				if(jse->value == 1){
     					_GlobalDate->jos_params.jos_button = 1;
-    					printf("1 \n");
     					josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     				}
     				break;
     		case 0x01:
     			if(jse->value == 1){
     				_GlobalDate->jos_params.jos_button = 2;
-    				printf("2 \n");
     				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     			}
     				break;
@@ -314,7 +312,6 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
     			if(jse->value == 1)
     			{
     				_GlobalDate->jos_params.jos_button = 3;
-    				printf("3 \n");
     				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     			}
     				break;
@@ -322,14 +319,12 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
     			if(jse->value == 1)
     			{
     				_GlobalDate->jos_params.jos_button = 4;
-					printf("4 \n");
 					josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     			}
     			break;
     		case 0x04:
     			if(jse->value == 1){
     				_GlobalDate->jos_params.jos_button = 5;
-    				printf("5 \n");
     				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     			}
     			break;
@@ -337,7 +332,6 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
     			if(jse->value == 1)
     			{
     				_GlobalDate->jos_params.jos_button = 6;
-    				printf("6 \n");
     				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     			}
     			break;
@@ -345,7 +339,6 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
     			if(jse->value == 1)
     			{
     				_GlobalDate->jos_params.jos_button = 7;
-					printf("7 \n");
 					josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     			}
     			break;
@@ -354,7 +347,6 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
     			if(jse->value == 1)
     			{
     				_GlobalDate->jos_params.jos_button = 8;
-    				printf("8 \n");
     				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
     			}
     			break;
@@ -362,7 +354,6 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
 		case MSGID_INPUT_9:
 			if(jse->value == 1){
 				_GlobalDate->jos_params.jos_button = 9;
-				printf("9 \n");
 				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 			}
 			break;
@@ -370,7 +361,6 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
 		case MSGID_INPUT_10:
 			if(jse->value == 1){
 				_GlobalDate->jos_params.jos_button = 0;
-				printf("0 \n");
 				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 			}
 			break;
@@ -379,7 +369,6 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
 			{
 				_GlobalDate->jos_params.type = enter;
 				_GlobalDate->jos_params.enter = true;
-				printf("回车 \n");
 				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 			}
 			else
@@ -394,7 +383,6 @@ void CJoystick::ProcJosEvent_Button(UINT8  njosNum)
 				else
 					_GlobalDate->jos_params.menu = false;
 				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
-				printf("菜单 \n");
 			}
 			else
 				_GlobalDate->jos_params.type = 0;
@@ -419,12 +407,10 @@ void CJoystick::procMouse_Button(UINT8  njosNum)
     			_GlobalDate->jos_params.type = mouse_button;
     			if(jse->value == 1)
     			{
-    				printf("左键 按下\n");
     				_GlobalDate->jos_params.mouse_button = 3;
     				_GlobalDate->jos_params.mouse_state = true;
     			}
     			else{
-    				printf("左键抬起 \n");
     				_GlobalDate->jos_params.mouse_button = 3;
     				_GlobalDate->jos_params.mouse_state = false;
     			}
@@ -434,7 +420,6 @@ void CJoystick::procMouse_Button(UINT8  njosNum)
     			_GlobalDate->jos_params.type = mouse_button;
     			if(jse->value == 1)
     			{
-    			printf("右键 按下\n");
     			_GlobalDate->jos_params.mouse_button = 4;
     			_GlobalDate->jos_params.mouse_state = true;
     			}
@@ -450,8 +435,9 @@ void CJoystick::procMouse_Button(UINT8  njosNum)
     			}
     			break;
     		case 0x05:
-    			if(jse->value == 1)
+    			if(jse->value == 1){
 
+    			}
     			break;
     		case 0x06:
 
@@ -471,15 +457,12 @@ void CJoystick::procMouse_Button(UINT8  njosNum)
 			break;
 
 		case MSGID_INPUT_10:
-			if(jse->value == 1)
-			{
+			if(jse->value == 1){
+
 			}
-			else
-				_GlobalDate->jos_params.type = 0;
 			break;
 		case MSGID_INPUT_Menu:
-			if(jse->value == 1)
-			{
+			if(jse->value == 1){
 
 			}
 			break;
@@ -494,7 +477,13 @@ int CJoystick::JosToWinX(int x, int sensor)
 	if(video_pal == sensor)
 		m_WinX = x/91 + ShowDPI[sensor][0]/2;
 	else if((video_gaoqing0 == sensor)||(video_gaoqing == sensor)||(video_gaoqing2 == sensor)||(video_gaoqing3 == sensor))
-		m_WinX = x/34 + ShowDPI[sensor][0]/2;
+	{
+		m_WinX = x/33 + ShowDPI[sensor][0]/2;
+		if(m_WinX > ShowDPI[sensor][0] - 10)
+			m_WinX = ShowDPI[sensor][0] - 10;
+		else if(m_WinX < 0)
+			m_WinX = 0;
+	}
 	return m_WinX;
 }
 
@@ -504,7 +493,13 @@ int CJoystick::JosToWinY(int y, int sensor)
 	if(video_pal == sensor)
 		m_WinY = y/113 + ShowDPI[sensor][1]/2;
 	else if((video_gaoqing0 == sensor)||(video_gaoqing == sensor)||(video_gaoqing2 == sensor)||(video_gaoqing3 == sensor))
-		m_WinY = y/60 + ShowDPI[sensor][1]/2;
+	{
+		m_WinY = y/59 + ShowDPI[sensor][1]/2;
+		if(m_WinY > ShowDPI[sensor][1] - 10)
+			m_WinY = ShowDPI[sensor][1] - 10;
+		else if(m_WinY < 0)
+			m_WinY =0;
+	}
 	return m_WinY;
 }
 
