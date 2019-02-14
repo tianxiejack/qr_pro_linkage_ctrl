@@ -88,7 +88,6 @@ public:
 			  	CMD_TRKDOOR fr_img_cmd_trkdoor;
 			  	CMD_MOUSEPTZ cmd_mouseptz;
 			  	CMD_Mtd_Frame Mtd_Frame;
-			  	ctrlParams josParams;
 			  	CMD_Mtd_Frame* pMtd;
 
 

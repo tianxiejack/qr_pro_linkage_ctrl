@@ -1112,17 +1112,34 @@ void CManager::usd_API_queryPos()
 void CManager::usd_API_WORKMODEWITCH()
 {
 	m_GlobalDate->workMode = (m_GlobalDate->workMode + 1)%3;
-	m_ipc->josParams.type = workMode;
+	m_GlobalDate->jos_params.type = workMode;
+	switch(m_GlobalDate->workMode)
+	{
+	case 0:
+		m_GlobalDate->workMode = 1;
+		break;
+	case 1:
+		m_GlobalDate->workMode = 2;
+		break;
+	case 2:
+		m_GlobalDate->workMode = 3;
+		break;
+	}
 	switch(m_GlobalDate->workMode)
 	{
 	case 0x01:
-		m_ipc->josParams.workMode = manual_linkage;
+		m_GlobalDate->ImgMtdStat = m_GlobalDate->mtdMode = 0;
+		usd_API_MTDMode();
+		m_GlobalDate->jos_params.workMode = manual_linkage;
 		break;
 	case 0x02:
-		m_ipc->josParams.workMode = Auto_linkage;
+		m_GlobalDate->ImgMtdStat = 1;
+		m_GlobalDate->mtdMode = 0;
+		usd_API_MTDMode();
+		m_GlobalDate->jos_params.workMode = Auto_linkage;
 		break;
 	case 0x03:
-		m_ipc->josParams.workMode = ballctrl;
+		m_GlobalDate->jos_params.workMode = ballctrl;
 		break;
 	}
 	usd_API_ctrlParams();
@@ -1618,7 +1635,11 @@ void CManager::usd_API_MTDMode()
 			m_ipc->IPCMtdSwitch(m_GlobalDate->ImgMtdStat, m_GlobalDate->mtdMode);
 	}
 	else
+	{
 		m_ipc->IPCMtdSwitch(m_GlobalDate->ImgMtdStat, m_GlobalDate->mtdMode);
+		pThis->dtimer.stopTimer(pThis->swtarget_id);
+		m_GlobalDate->MtdAutoLoop = false;
+	}
 
 	if(!m_GlobalDate->ImgMtdStat)
 	{

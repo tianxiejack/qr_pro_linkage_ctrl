@@ -211,7 +211,7 @@ IMGSTATUS  avt_status;
 MOUSEPTZ ipc_mouseptz;
 MtdConfig mtdconfig;
 LinkageParam linkagePos;
-ctrlParams josParams;
+ctrlParams jos_params;
 G_uart_open_params m_uart_params[5];
 camera_PosParams m_camera_pos[5];
 

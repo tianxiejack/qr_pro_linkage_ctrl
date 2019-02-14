@@ -201,7 +201,7 @@ void CIPCProc::getIPCMsgProc()
      			_Message->MSGDRIV_send(MSGID_EXT_INPUT_MTDMode, 0);
      			break;
      		case josctrl:
-     			memcpy(&josParams, &fr_img_test.param, sizeof(josParams));
+     			_GlobalDate->jos_params.menu = fr_img_test.param[32];
      			break;
 
 		case setconfig:
@@ -497,7 +497,7 @@ int CIPCProc::ipcSendJosParams()
 {
 	memset(test.param, 0, PARAMLEN);
 	test.cmd_ID = josctrl;
-	memcpy(&test.param,&josParams , sizeof(josParams));
+	memcpy(test.param,&_GlobalDate->jos_params , sizeof(_GlobalDate->jos_params));
 	ipc_sendmsg(&test, IPC_TOIMG_MSG);
 	return 0;
 }
