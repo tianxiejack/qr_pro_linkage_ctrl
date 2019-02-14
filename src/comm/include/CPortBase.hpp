@@ -88,10 +88,12 @@ public:
     void readConfigSetting(sendInfo * spBuf);
     void extExtraInputResponse(sendInfo * spBuf);
     void upgradefwStat(sendInfo * spBuf);
+	void impconfigStat(sendInfo * spBuf);
     void paramtodef(sendInfo * spBuf);
     void ack_pan(sendInfo * spBuf);
     void ack_Tilt(sendInfo * spBuf);
     void ack_zoom(sendInfo * spBuf);
+	int impconfig(unsigned char *swap_data_buf, unsigned int swap_data_len);
 	int upgradefw(unsigned char *swap_data_buf, unsigned int swap_data_len);
 	int fw_update_runtar(void);
 	int update_startsh(void);

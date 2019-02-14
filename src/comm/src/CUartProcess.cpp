@@ -228,7 +228,12 @@ int CUartProcess::recvData()
 					{
 						if(swap_data.len==((swap_data.buf[2]|(swap_data.buf[3]<<8))+5))
 						{
-							if(swap_data.buf[4]==0x35)
+							if(swap_data.buf[4]==0x32)
+							{
+								printf("%s,%d,it is import config\n",__FILE__,__LINE__);
+								impconfig(swap_data.buf,swap_data.len);
+							}
+							else if(swap_data.buf[4]==0x35)
 							{
 								printf("%s,%d,it is upgrade fw\n",__FILE__,__LINE__);
 								upgradefw(swap_data.buf,swap_data.len);

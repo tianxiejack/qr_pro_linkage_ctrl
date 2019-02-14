@@ -596,6 +596,9 @@ int  CPortBase::getSendInfo(int  respondId, sendInfo * psendBuf)
 			printf("%s,%d, upgradefw response!!!\n",__FILE__,__LINE__);
 			upgradefwStat(psendBuf);
 			break;
+		case ACK_impconfig:
+			impconfigStat(psendBuf);
+			break;
 		case ACK_param_todef:
 			paramtodef(psendBuf);
 			break;
@@ -927,7 +930,6 @@ void CPortBase::extExtraInputResponse(sendInfo * spBuf)
 
 }
 
-
 void  CPortBase:: upgradefwStat(sendInfo * spBuf)
 {
 	u_int8_t sumCheck;
@@ -943,6 +945,22 @@ void  CPortBase:: upgradefwStat(sendInfo * spBuf)
 	spBuf->sendBuff[7]=(sumCheck&0xff);
 	spBuf->byteSizeSend=0x08;
 }
+
+void CPortBase::impconfigStat(sendInfo * spBuf)
+{
+	u_int8_t sumCheck;
+	spBuf->sendBuff[0]=0xEB;
+	spBuf->sendBuff[1]=0x53;
+	spBuf->sendBuff[2]=0x03;
+	spBuf->sendBuff[3]=0x00;
+	spBuf->sendBuff[4]=0x32;
+	spBuf->sendBuff[5]=_globalDate->respimpconfig_stat;
+	spBuf->sendBuff[6]=_globalDate->respimpconfig_perc;
+	sumCheck=sendCheck_sum(6,spBuf->sendBuff+1);
+	spBuf->sendBuff[7]=(sumCheck&0xff);
+	spBuf->byteSizeSend=0x08;
+}
+
 void  CPortBase:: paramtodef(sendInfo * spBuf)
 {
 	u_int8_t sumCheck;
@@ -1099,6 +1117,75 @@ int CPortBase::upgradefw(unsigned char *swap_data_buf, unsigned int swap_data_le
 	}
 
 }
+
+int CPortBase::impconfig(unsigned char *swap_data_buf, unsigned int swap_data_len)
+{
+	int status;
+	int write_len;
+	int file_len;
+
+	int recv_len = swap_data_len-13;
+	unsigned char buf[8] = {0xEB,0x53,0x03,0x00,0x32,0x00,0x00,0x00};
+
+	unsigned char cksum = 0;
+	for(int n=1;n<swap_data_len-1;n++)
+	{
+		cksum ^= swap_data_buf[n];
+	}
+	if(cksum !=swap_data_buf[swap_data_len-1])
+	{
+		printf("%s,%d, checksum error,cal is %02x, recv is %02x\n",__FILE__,__LINE__,cksum,swap_data_buf[swap_data_len-1]);
+		return -1;
+	}
+	memcpy(&file_len,swap_data_buf+5,4);
+	if(NULL==fp2)
+	{
+		if(NULL ==(fp2 = fopen("Profile.yml","w")))
+		{
+			perror("fopen\r\n");
+			return -1;
+		}
+		else
+		{
+			printf("openfile Profile.yml success\n");
+		}
+	}
+
+	write_len = fwrite(swap_data_buf+12,1,recv_len,fp2);
+	fflush(fp2);
+	if(write_len < recv_len)
+	{
+		printf("Write Profile.yml error!\r\n");
+		return -1;
+	}
+	current_len2 += recv_len;
+	if(current_len2 == file_len)
+	{
+		current_len2 = 0;
+		fclose(fp2);
+		fp2 = NULL;
+
+		if(0 == system("cp Profile.yml ~/dss_pkt/"))
+			_globalDate->respimpconfig_stat = 0x01;
+		else
+			_globalDate->respimpconfig_stat = 0x02;
+		
+		_globalDate->respimpconfig_perc = 100;
+
+		system("sync");
+		
+		_globalDate->feedback=ACK_impconfig;
+		OSA_semSignal(&_globalDate->m_semHndl);
+	}
+	else
+	{
+		_globalDate->respimpconfig_stat= 0x00;
+		_globalDate->respimpconfig_perc = current_len2*100/file_len;
+		_globalDate->feedback=ACK_impconfig;
+		OSA_semSignal(&_globalDate->m_semHndl);
+	}
+}
+
 int CPortBase::fw_update_runtar(void)
 {
 	printf("tar zxvf dss_pkt.tar.gz...\r\n"); 

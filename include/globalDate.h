@@ -228,6 +228,8 @@ int choose;
 int IrisAndFocus_Ret;
 int respupgradefw_stat;
 int respupgradefw_perc;
+int respimpconfig_stat;
+int respimpconfig_perc;
 int respexpconfig_stat;
 int respexpconfig_len;
 unsigned char respexpconfig_buf[1024+256];

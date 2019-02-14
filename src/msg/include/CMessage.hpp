@@ -309,6 +309,7 @@ typedef enum{
 	ACK_config_Read,
 	ACK_jos_Kboard,
 	ACK_upgradefw,
+	ACK_impconfig,
 	ACK_pan,
 	ACK_Tilt,  //30
 	ACK_zoom,
