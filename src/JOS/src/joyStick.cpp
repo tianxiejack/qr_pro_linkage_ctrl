@@ -5,10 +5,13 @@
 #include "joyStick.h"
 #include "app_status.h"
 
+const int Jos_type = Jos_usb;
 CGlobalDate* CJoystick::_GlobalDate = 0;
 CStatusManager* CJoystick::_StatusManager = 0;
 
 bool CJoystick::JosStart = true;
+bool CJoystick::HKJosStart = true;
+
 CJoystick::CJoystick()
 {
 	jse = NULL;
@@ -29,19 +32,79 @@ CJoystick::~CJoystick()
 
 int  CJoystick::Create()
 {
-	 open_joystick();
-	  if (joystick_fd < 0)
-	    return -1;
-	 jse = new joy_event;
-	 Run();
+	if(Jos_type == Jos_usb)
+	{
+		int rv;
+		user_device.idProduct = USB_PRODUCT_ID;
+		user_device.idVendor =  USB_VENDOR_ID ;
+		user_device.bInterfaceClass = LIBUSB_CLASS_HID ;
+		user_device.bInterfaceSubClass = LIBUSB_CLASS_HID ;
+		user_device.bmAttributes = LIBUSB_TRANSFER_TYPE_INTERRUPT ;
+		user_device.dev = NULL;
+		init_libusb();
+
+		rv = get_device_descriptor(&dev_desc,&user_device);
+		if(rv < 0) {
+			printf("*** get_device_descriptor failed! \n");
+			return -1;
+		}
+		printf("get_device_descriptor  rv = %d \n",rv);
+		rv = get_device_endpoint(&dev_desc,&user_device);
+		if(rv < 0) {
+			printf("*** get_device_endpoint failed! rv:%d \n",rv);
+			return -1;
+		}
+		printf("get_device_endpoint  rv = %d \n",rv);
+		g_usb_handle = libusb_open_device_with_vid_pid(NULL, user_device.idVendor, user_device.idProduct);
+		if(g_usb_handle == NULL) {
+			printf("*** Permission denied or Can not find the USB board (Maybe the USB driver has not been installed correctly), quit!\n");
+			return -1;
+		}
+			rv = libusb_claim_interface(g_usb_handle,user_device.bInterfaceNumber);
+			if(rv < 0) {
+				rv = libusb_detach_kernel_driver(g_usb_handle,user_device.bInterfaceNumber);
+				if(rv < 0) {
+					printf("*** libusb_detach_kernel_driver failed! rv%d\n",rv);
+					return -1;
+				}
+				rv = libusb_claim_interface(g_usb_handle,user_device.bInterfaceNumber);
+				if(rv < 0)
+				{
+					printf("*** libusb_claim_interface failed! rv%d\n",rv);
+					return -1;
+				}
+			}
+
+		USB_run();
+	}
+	else if(Jos_type == Jos_dev)
+	{
+		 open_joystick();
+		  if (joystick_fd < 0)
+			return -1;
+		 jse = new joy_event;
+		 Run();
+	}
 	 return 0;
 }
 
 int  CJoystick::Destroy()
 {
-	JosStart = false;
-	OSA_thrDelete(&m_thrJoy);
-	Stop();
+	if(Jos_type == Jos_usb)
+	{
+		HKJosStart = false;
+		OSA_thrDelete(&HK_thrJoy);
+		libusb_close(g_usb_handle);
+		libusb_release_interface(g_usb_handle,user_device.bInterfaceNumber);
+		libusb_free_device_list(user_device.devs, 1);
+		libusb_exit(NULL);
+	}
+	else if(Jos_type == Jos_dev){
+		JosStart = false;
+		OSA_thrDelete(&m_thrJoy);
+		Stop();
+	}
+
 	return 0;
 }
 
@@ -547,3 +610,142 @@ void CJoystick::josSendMsg(int MsgId)
 	_Message->MSGDRIV_send(MsgId, 0);
 }
 
+int CJoystick::init_libusb(void)
+{
+	/*1. init libusb lib*/
+	int rv = 0;
+
+	rv = libusb_init(NULL);
+	if(rv < 0) {
+		printf("*** initial USB lib failed! \n");
+		return -1;
+	}
+	return rv;
+}
+
+
+int CJoystick::get_device_descriptor(struct libusb_device_descriptor *dev_desc,struct userDevice *user_device)
+{
+	/*2.get device descriptor*/
+	int rv = -2;
+	ssize_t cnt;
+	int i = 0;
+
+	libusb_device **devs;
+	libusb_device *dev;
+
+	cnt = libusb_get_device_list(NULL, &devs); //check the device number
+	if (cnt < 0)
+		return (int) cnt;
+
+	while ((dev = devs[i++]) != NULL) {
+		rv = libusb_get_device_descriptor(dev,dev_desc);
+		if(rv < 0) {
+			printf("*** libusb_get_device_descriptor failed! i:%d \n",i);
+			return -1;
+		}
+		if(dev_desc->idProduct==user_device->idProduct &&dev_desc->idVendor==user_device->idVendor)
+		{
+			user_device->dev = dev;
+			user_device->devs = devs;
+			rv = 0;
+			break;
+		}
+	}
+	return rv;
+}
+
+int CJoystick::match_with_endpoint(const struct libusb_interface_descriptor * interface, struct userDevice *user_device)
+{
+	int i;
+	int ret=0;
+	for(i=0;i<interface->bNumEndpoints;i++)
+	{
+		if((interface->endpoint[i].bmAttributes&0x03)==user_device->bmAttributes)   //transfer type :bulk ,control, interrupt
+		{
+				if(interface->endpoint[i].bEndpointAddress&0x80)					//out endpoint & in endpoint
+				{
+					ret|=1;
+					user_device->bInEndpointAddress = interface->endpoint[i].bEndpointAddress;
+				}
+				else
+				{
+					ret|=2;
+					user_device->bOutEndpointAddress = interface->endpoint[i].bEndpointAddress;
+				}
+		}
+
+	}
+	if(ret==3)
+	{
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
+}
+
+int CJoystick::get_device_endpoint(struct libusb_device_descriptor *dev_desc,struct userDevice *user_device)
+{
+	/*3.get device endpoint that you need */
+	int rv = -2;
+	int i,j,k;
+	struct libusb_config_descriptor *conf_desc;
+	u_int8_t isFind = 0;
+	for (i=0; i< dev_desc->bNumConfigurations; i++)
+	{
+		if(user_device->dev != NULL)
+			rv = libusb_get_config_descriptor(user_device->dev,i,&conf_desc);
+		if(rv < 0) {
+			printf("*** libusb_get_config_descriptor failed! \n");
+			return -1;
+		}
+		for (j=0; j< conf_desc->bNumInterfaces; j++)
+		{
+			for (k=0; k < conf_desc->interface[j].num_altsetting; k++)
+			{
+				if( conf_desc->interface[j].altsetting[k].bInterfaceClass==user_device->bInterfaceClass )
+				{
+					if(match_with_endpoint(&(conf_desc->interface[j].altsetting[k] ), user_device ))
+					{
+						user_device->bInterfaceNumber = conf_desc->interface[j].altsetting[k].bInterfaceNumber;
+						libusb_free_config_descriptor(conf_desc);
+						rv = 0;
+						return rv;
+					}
+				}
+			}
+		}
+	}
+	return -2;  //don't find user device
+}
+
+int CJoystick::USB_run()
+{
+	int iRet;
+	iRet = OSA_thrCreate(&HK_thrJoy, HK_josEventFunc , 0, 0, (void*)this);
+		if(iRet != 0)
+	printf(" [joystick_USB] jos thread create failed\n");
+	return 0;
+}
+
+int CJoystick::HKJoystickProcess()
+{
+	int rv;
+	int length;
+	unsigned char jos_date[64] = {};
+	rv =  libusb_interrupt_transfer(g_usb_handle,user_device.bInEndpointAddress,jos_date,8,&length,10000000);
+	if(rv < 0) {
+		printf("*** bulk_transfer failed!   rv = %d \n",rv);
+		return -1;
+	}
+	else
+	{
+		int i;
+	//	printf("length = %d \n",length);
+		for(i =7; i >= 0 ; i--)
+			printf(" [%d] = %02x",i, jos_date[i]);
+		putchar(10);
+	}
+}
