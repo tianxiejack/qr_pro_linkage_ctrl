@@ -64,6 +64,16 @@ typedef enum{
 	Jos_usb
 }JosType;
 
+typedef enum{
+	usb_1_8 = 0,
+	usb_special,
+	usb_enter,
+	usb_X,
+	usb_Y,
+	usb_Z
+}HK_JosParams;
+
+
 class CJoystick : public CJosInterface {
 
 public:
@@ -111,6 +121,14 @@ private:
     int init_libusb(void);
     int get_device_endpoint(struct libusb_device_descriptor *dev_desc,struct userDevice *user_device);
     int match_with_endpoint(const struct libusb_interface_descriptor * interface, struct userDevice *user_device);
+	void HK_procJosEvent_Axis(unsigned char*  josNum );
+	void HK_procMouse_Axis(unsigned char*  MouseNum);
+    void HK_ProcJosEvent_Button(unsigned char*  josNum);
+    void HK_procMouse_Button(unsigned char*  MouseNum);
+    void HK_JosToSpeedX(int X);
+    void HK_JosToSpeedY(int Y);
+	bool Cur_pressBut;
+
 
 	OSA_ThrHndl m_thrJoy;
 	static void *josEventFunc(void *context)

@@ -1809,7 +1809,7 @@ void CManager::ExtInputCtrl_AXIS()
 
 		iAxis_X = m_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AXISX);
 		iAxis_Y = m_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AXISY);
-
+#if 0
 	m_Platform->PlatformCtrl_VirtualInput(m_plt, DevUsr_AcqJoystickXInput, iAxis_X/jos_value);
 	m_Platform->PlatformCtrl_VirtualInput(m_plt, DevUsr_AimpointRefineXInput, iAxis_X/jos_value);
 	m_Platform->PlatformCtrl_VirtualInput(m_plt, DevUsr_AcqJoystickYInput, iAxis_Y/jos_value);
@@ -1821,11 +1821,11 @@ void CManager::ExtInputCtrl_AXIS()
      	 m_Platform->PlatformCtrl_TrackerInput(m_plt, &m_pltInput);
      	 m_Platform->PlatformCtrl_TrackerOutput(m_plt, &m_pltOutput);
      	}
-
+#endif
 		if(m_ptz != NULL){
 			if(ipc_x == 0 && ipc_y == 0 ){
-				m_ptz->m_iSetPanSpeed = m_ptzSpeed.GetPanSpeed((int)m_pltOutput.fPlatformDemandX);
-				m_ptz->m_iSetTiltSpeed = m_ptzSpeed.GetTiltSpeed((int)m_pltOutput.fPlatformDemandY);
+				m_ptz->m_iSetPanSpeed = iAxis_X;
+				m_ptz->m_iSetTiltSpeed = iAxis_Y;
 			}
 			else{
 				if(TrkStat == 0){

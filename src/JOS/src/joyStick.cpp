@@ -16,6 +16,7 @@ CJoystick::CJoystick()
 {
 	jse = NULL;
 	joystick_fd = -1;
+	Cur_pressBut = true;
 	_StatusManager = CStatusManager::Instance();
 	_GlobalDate = CGlobalDate::Instance();
 	_Message = CMessage::getInstance();
@@ -742,10 +743,342 @@ int CJoystick::HKJoystickProcess()
 	}
 	else
 	{
+#if 0
 		int i;
-	//	printf("length = %d \n",length);
+		printf("length = %d \n",length);
 		for(i =7; i >= 0 ; i--)
 			printf(" [%d] = %02x",i, jos_date[i]);
 		putchar(10);
+#endif
+
+		if(jos_date[usb_1_8] || jos_date[usb_enter] || jos_date[usb_special])
+			Cur_pressBut = true;
+		else if(jos_date[usb_X] || jos_date[usb_Y] || jos_date[usb_Z])
+			Cur_pressBut = false;
+
+    	if(_GlobalDate->jos_params.ctrlMode == mouse)
+    	{
+    		HK_procMouse_Axis(jos_date);
+    		HK_procMouse_Button(jos_date);
+    	}
+    	else
+    	{
+    		if(!Cur_pressBut)
+    			HK_procJosEvent_Axis(jos_date);
+    		else
+    			HK_ProcJosEvent_Button(jos_date);
+    //		if(!jos_date[usb_1_8] || !jos_date[usb_enter] || !jos_date[usb_special])
+    	//		_GlobalDate->jos_params.type = 0;
+    	}
 	}
 }
+
+void CJoystick::HK_procJosEvent_Axis(unsigned char*  josNum)
+{
+	static int  dirLimit;
+	if(_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_IrisAndFocusAndExit) == 0 && !_GlobalDate->jos_params.menu)
+	{
+		if(Xinit)
+			josNum[usb_X] = 0;
+		Xinit = false;
+		HK_JosToSpeedX(josNum[usb_X]);
+	}
+
+		if(_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_IrisAndFocusAndExit) == 0 && !_GlobalDate->jos_params.menu)
+		{
+			if(Yinit)
+				josNum[usb_Y] = 0;
+			Yinit = false;
+			HK_JosToSpeedY(josNum[usb_Y]);
+		}
+		else if(_GlobalDate->jos_params.menu)
+		{
+			_GlobalDate->jos_params.type = jos_Dir;
+			if(josNum[usb_Y] < 0xef && josNum[usb_Y] > 0xcd)
+			{
+				if(!dirLimit)
+					_GlobalDate->jos_params.jos_Dir = cursor_up;
+				else
+				_GlobalDate->jos_params.jos_Dir = 0;
+				dirLimit = true;
+			}
+			else if(josNum[usb_Y] > 0x11 && josNum[usb_Y] < 0x33)
+			{
+				if(!dirLimit)
+					_GlobalDate->jos_params.jos_Dir = cursor_down;
+				else
+				_GlobalDate->jos_params.jos_Dir = 0;
+				dirLimit = true;
+			}
+			else if(josNum[usb_Y] == 0)
+			{
+				dirLimit = false;
+				_GlobalDate->jos_params.type = 0;
+				_GlobalDate->jos_params.jos_Dir = 0;
+			}
+			printf("!!!!!!!!!!!!!!!!!!!!!!\n");
+			josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+		}
+#if 0
+		else {
+			Y_CtrlIrisAndFocus(jse->value);
+			josSendMsg(MSGID_EXT_INPUT_IrisAndFocusAndExit);
+		}
+#endif
+}
+
+
+void CJoystick::HK_procMouse_Axis(unsigned char*  MouseNum)
+{
+	printf( "josNum[3] = %x \n", MouseNum[3]);
+#if 0
+	_GlobalDate->jos_params.type = cursor_move;
+	_GlobalDate->jos_params.cursor_x = JosToWinX(jse->value, video_gaoqing);
+	josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+	if(!jse->value)
+	_GlobalDate->jos_params.type = 0;
+#endif
+
+	printf( "josNum[4] = %x \n", MouseNum[4] );
+#if 0
+	_GlobalDate->jos_params.type = cursor_move;
+	_GlobalDate->jos_params.cursor_y = JosToWinY(jse->value, video_gaoqing);
+	josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+	if(!jse->value)
+	_GlobalDate->jos_params.type = 0;
+#endif
+}
+
+void CJoystick::HK_ProcJosEvent_Button(unsigned char*  josNum)
+{
+	_GlobalDate->jos_params.type = jos_button;
+	printf("josNum[usb_1_8]  = %x   josNum[usb_special] = %x  \n", josNum[usb_1_8], josNum[usb_special]);
+	switch(josNum[usb_1_8])
+	{
+		case 0x01:
+					_GlobalDate->jos_params.jos_button = 1;
+				break;
+		case 0x02:
+				_GlobalDate->jos_params.jos_button = 2;
+				break;
+		case 0x04:
+				_GlobalDate->jos_params.jos_button = 3;
+				break;
+		case 0x08:
+				_GlobalDate->jos_params.jos_button = 4;
+			break;
+		case 0x10:
+				_GlobalDate->jos_params.jos_button = 5;
+			break;
+		case 0x20:
+				_GlobalDate->jos_params.jos_button = 6;
+			break;
+		case 0x40:
+				_GlobalDate->jos_params.jos_button = 7;
+			break;
+
+		case 0x80:
+				_GlobalDate->jos_params.jos_button = 8;
+			break;
+		case 0:
+			break;
+	}
+
+	switch(josNum[usb_special])
+	{
+	case 0x01:
+			_GlobalDate->jos_params.jos_button = 9;
+		break;
+
+	case 0x02:
+			_GlobalDate->jos_params.jos_button = 0;
+		break;
+
+	case 0x20:
+		_GlobalDate->jos_params.type = jos_menu;
+		if(!_GlobalDate->jos_params.menu)
+			_GlobalDate->jos_params.menu = true;
+		else
+			_GlobalDate->jos_params.menu = false;
+		break;
+
+	case 0:
+		//_GlobalDate->jos_params.type = 0;
+		break;
+
+	default:
+		break;
+	}
+	if(josNum[usb_1_8]  || josNum[usb_special])
+		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+
+	if(josNum[usb_enter] == 0x01)
+	{
+		_GlobalDate->jos_params.type = enter;
+		_GlobalDate->jos_params.enter = true;
+		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+	}
+
+}
+
+void CJoystick::HK_procMouse_Button(unsigned char*  MouseNum)
+{
+//	case 0x02:
+		_GlobalDate->jos_params.type = mouse_button;
+		if(jse->value == 1)
+		{
+			_GlobalDate->jos_params.mouse_button = 3;
+			_GlobalDate->jos_params.mouse_state = true;
+		}
+		else{
+			_GlobalDate->jos_params.mouse_button = 3;
+			_GlobalDate->jos_params.mouse_state = false;
+		}
+		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+
+//	case 0x03:
+		_GlobalDate->jos_params.type = mouse_button;
+		if(jse->value == 1)
+		{
+		_GlobalDate->jos_params.mouse_button = 4;
+		_GlobalDate->jos_params.mouse_state = true;
+		}
+		else{
+			_GlobalDate->jos_params.mouse_button = 4;
+			_GlobalDate->jos_params.mouse_state = false;
+		}
+		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+
+}
+
+void CJoystick::HK_JosToSpeedX(int X)
+{
+	int speed;
+	switch(X)
+	{
+	case 0xef:
+		speed = -10;
+		break;
+
+	case 0xde:
+		speed = -15;
+		break;
+
+	case 0xcd:
+		speed = -25;
+		break;
+
+	case 0xbc:
+		speed = -35;
+		break;
+
+	case 0xab:
+		speed = -45;
+		break;
+
+	case 0x9a:
+		speed = -55;
+		break;
+
+	case 0x89:
+		speed = -63;
+		break;
+
+	case 0x11:
+		speed = 10;
+		break;
+
+	case 0x22:
+		speed = 15;
+		break;
+
+	case 0x33:
+		speed = 25;
+		break;
+
+	case 0x44:
+		speed = 35;
+		break;
+
+	case 0x55:
+		speed = 45;
+		break;
+
+	case 0x66:
+		speed = 55;
+		break;
+
+	case 0x77:
+		speed = 63;
+		break;
+	}
+	_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AXISX) = speed;
+	josSendMsg(MSGID_EXT_INPUT_PLATCTRL);
+
+}
+
+void CJoystick::HK_JosToSpeedY(int Y)
+{
+	int speed;
+	switch(Y)
+	{
+	case 0xef:
+		speed = -10;
+		break;
+
+	case 0xde:
+		speed = -15;
+		break;
+
+	case 0xcd:
+		speed = -25;
+		break;
+
+	case 0xbc:
+		speed = -35;
+		break;
+
+	case 0xab:
+		speed = -45;
+		break;
+
+	case 0x9a:
+		speed = -55;
+		break;
+
+	case 0x89:
+		speed = -63;
+		break;
+
+	case 0x11:
+		speed = 10;
+		break;
+
+	case 0x22:
+		speed = 15;
+		break;
+
+	case 0x33:
+		speed = 25;
+		break;
+
+	case 0x44:
+		speed = 35;
+		break;
+
+	case 0x55:
+		speed = 45;
+		break;
+
+	case 0x66:
+		speed = 55;
+		break;
+
+	case 0x77:
+		speed = 63;
+		break;
+	}
+	_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AXISY) = speed;
+	josSendMsg(MSGID_EXT_INPUT_PLATCTRL);
+}
+
