@@ -263,7 +263,7 @@ void CPTZControl::RecvByte(unsigned char byRecv)
 				m_iZoomPos += recvBuffer[5];
 				_GlobalDate->rcv_zoomValue = (unsigned short)m_iZoomPos;
 				sync_zoom = 1;
-				printf("INFO: zoompos is %d\n",m_iZoomPos);
+				//printf("INFO: zoompos is %d\n",m_iZoomPos);
 				break;
 			case 0x63:
 				m_iMagnification = recvBuffer[4];

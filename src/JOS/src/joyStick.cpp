@@ -16,7 +16,7 @@ CJoystick::CJoystick()
 {
 	jse = NULL;
 	joystick_fd = -1;
-	Cur_pressBut = true;
+	Cur_pressBut = false;
 	_StatusManager = CStatusManager::Instance();
 	_GlobalDate = CGlobalDate::Instance();
 	_Message = CMessage::getInstance();
@@ -743,14 +743,6 @@ int CJoystick::HKJoystickProcess()
 	}
 	else
 	{
-#if 0
-		int i;
-		printf("length = %d \n",length);
-		for(i =7; i >= 0 ; i--)
-			printf(" [%d] = %02x",i, jos_date[i]);
-		putchar(10);
-#endif
-
 		if(jos_date[usb_1_8] || jos_date[usb_enter] || jos_date[usb_special])
 			Cur_pressBut = true;
 		else if(jos_date[usb_X] || jos_date[usb_Y] || jos_date[usb_Z])
@@ -758,8 +750,8 @@ int CJoystick::HKJoystickProcess()
 
     	if(_GlobalDate->jos_params.ctrlMode == mouse)
     	{
-    		HK_procMouse_Axis(jos_date);
-    		HK_procMouse_Button(jos_date);
+    			HK_procMouse_Axis(jos_date);
+    			HK_procMouse_Button(jos_date);
     	}
     	else
     	{
@@ -767,8 +759,6 @@ int CJoystick::HKJoystickProcess()
     			HK_procJosEvent_Axis(jos_date);
     		else
     			HK_ProcJosEvent_Button(jos_date);
-    //		if(!jos_date[usb_1_8] || !jos_date[usb_enter] || !jos_date[usb_special])
-    	//		_GlobalDate->jos_params.type = 0;
     	}
 	}
 }
@@ -782,77 +772,125 @@ void CJoystick::HK_procJosEvent_Axis(unsigned char*  josNum)
 			josNum[usb_X] = 0;
 		Xinit = false;
 		HK_JosToSpeedX(josNum[usb_X]);
-	}
 
-		if(_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_IrisAndFocusAndExit) == 0 && !_GlobalDate->jos_params.menu)
+		if(Yinit)
+			josNum[usb_Y] = 0;
+		Yinit = false;
+		HK_JosToSpeedY(josNum[usb_Y]);
+	}
+	else if(_GlobalDate->jos_params.menu)
+	{
+		_GlobalDate->jos_params.type = jos_Dir;
+		if(josNum[usb_Y] > 0x77)
 		{
-			if(Yinit)
-				josNum[usb_Y] = 0;
-			Yinit = false;
-			HK_JosToSpeedY(josNum[usb_Y]);
-		}
-		else if(_GlobalDate->jos_params.menu)
-		{
-			_GlobalDate->jos_params.type = jos_Dir;
-			if(josNum[usb_Y] < 0xef && josNum[usb_Y] > 0xcd)
-			{
-				if(!dirLimit)
-					_GlobalDate->jos_params.jos_Dir = cursor_up;
-				else
+			if(!dirLimit)
+				_GlobalDate->jos_params.jos_Dir = cursor_up;
+			else
 				_GlobalDate->jos_params.jos_Dir = 0;
-				dirLimit = true;
-			}
-			else if(josNum[usb_Y] > 0x11 && josNum[usb_Y] < 0x33)
-			{
-				if(!dirLimit)
-					_GlobalDate->jos_params.jos_Dir = cursor_down;
-				else
-				_GlobalDate->jos_params.jos_Dir = 0;
-				dirLimit = true;
-			}
-			else if(josNum[usb_Y] == 0)
-			{
-				dirLimit = false;
-				_GlobalDate->jos_params.type = 0;
-				_GlobalDate->jos_params.jos_Dir = 0;
-			}
-			printf("!!!!!!!!!!!!!!!!!!!!!!\n");
+			dirLimit = true;
 			josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 		}
-#if 0
-		else {
-			Y_CtrlIrisAndFocus(jse->value);
-			josSendMsg(MSGID_EXT_INPUT_IrisAndFocusAndExit);
+		else if(josNum[usb_Y] < 0x89 && josNum[usb_Y] > 0)
+		{
+			if(!dirLimit)
+				_GlobalDate->jos_params.jos_Dir = cursor_down;
+			else
+				_GlobalDate->jos_params.jos_Dir = 0;
+			dirLimit = true;
+			josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 		}
-#endif
+		else if( josNum[usb_Y]  == 0)
+		{
+			dirLimit = false;
+			_GlobalDate->jos_params.type = 0;
+			_GlobalDate->jos_params.jos_Dir = 0;
+		}
+	}
+	/***********/
+	static int zoom = 0;
+	if(josNum[usb_Z] == 0)
+	{
+		if(zoom == 1)
+		{
+			_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomShort ) = 0;
+			josSendMsg(MSGID_EXT_INPUT_OPTICZOOMSHORTCTRL);
+		}
+		else if(zoom == 2)
+		{
+			_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomLong ) = 0;
+			josSendMsg(MSGID_EXT_INPUT_OPTICZOOMLONGCTRL);
+		}
+		zoom = 0;
+	}
+	else if(josNum[usb_Z] < 0x77 && josNum[usb_Z] > 0x11)
+	{
+		_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomShort ) = 1;
+		josSendMsg(MSGID_EXT_INPUT_OPTICZOOMSHORTCTRL);
+		zoom = 1;
+	}
+	else if(josNum[usb_Z] > 0xcd && josNum[usb_Z] < 0xef )
+	{
+		_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomLong ) = 1;
+		josSendMsg(MSGID_EXT_INPUT_OPTICZOOMLONGCTRL);
+		zoom = 2;
+	}
+
 }
 
 
 void CJoystick::HK_procMouse_Axis(unsigned char*  MouseNum)
 {
-	printf( "josNum[3] = %x \n", MouseNum[3]);
-#if 0
-	_GlobalDate->jos_params.type = cursor_move;
-	_GlobalDate->jos_params.cursor_x = JosToWinX(jse->value, video_gaoqing);
-	josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
-	if(!jse->value)
-	_GlobalDate->jos_params.type = 0;
-#endif
+	if(MouseNum[usb_X])
+	{
+		_GlobalDate->jos_params.type = cursor_move;
+		_GlobalDate->jos_params.cursor_x = HK_JosToMouseX(MouseNum[usb_X]);
+		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+	}
 
-	printf( "josNum[4] = %x \n", MouseNum[4] );
-#if 0
-	_GlobalDate->jos_params.type = cursor_move;
-	_GlobalDate->jos_params.cursor_y = JosToWinY(jse->value, video_gaoqing);
-	josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
-	if(!jse->value)
-	_GlobalDate->jos_params.type = 0;
-#endif
+	if(MouseNum[usb_Y])
+	{
+		_GlobalDate->jos_params.type = cursor_move;
+		_GlobalDate->jos_params.cursor_y = HK_JosToMouseY(MouseNum[usb_Y]);
+		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+	}
+
+	/***********/
+
+	static int zoom = 0;
+	if(MouseNum[usb_Z] == 0)
+	{
+		if(zoom == 1)
+		{
+			_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomShort ) = 0;
+			josSendMsg(MSGID_EXT_INPUT_OPTICZOOMSHORTCTRL);
+		}
+		else if(zoom == 2)
+		{
+			_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomLong ) = 0;
+			josSendMsg(MSGID_EXT_INPUT_OPTICZOOMLONGCTRL);
+		}
+		zoom = 0;
+
+	}
+	else if(MouseNum[usb_Z] < 0x77 && MouseNum[usb_Z] > 0x11)
+	{
+		_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomShort ) = 1;
+		josSendMsg(MSGID_EXT_INPUT_OPTICZOOMSHORTCTRL);
+		zoom = 1;
+	}
+	else if(MouseNum[usb_Z] > 0xcd && MouseNum[usb_Z] < 0xef )
+	{
+		_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomLong ) = 1;
+		josSendMsg(MSGID_EXT_INPUT_OPTICZOOMLONGCTRL);
+		zoom = 2;
+	}
+
 }
 
 void CJoystick::HK_ProcJosEvent_Button(unsigned char*  josNum)
 {
 	_GlobalDate->jos_params.type = jos_button;
-	printf("josNum[usb_1_8]  = %x   josNum[usb_special] = %x  \n", josNum[usb_1_8], josNum[usb_special]);
+	//printf("josNum[usb_1_8]  = %x   josNum[usb_special] = %x  \n", josNum[usb_1_8], josNum[usb_special]);
 	switch(josNum[usb_1_8])
 	{
 		case 0x01:
@@ -887,11 +925,18 @@ void CJoystick::HK_ProcJosEvent_Button(unsigned char*  josNum)
 	switch(josNum[usb_special])
 	{
 	case 0x01:
-			_GlobalDate->jos_params.jos_button = 9;
+		_GlobalDate->jos_params.jos_button = 9;
+		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 		break;
 
 	case 0x02:
-			_GlobalDate->jos_params.jos_button = 0;
+		_GlobalDate->jos_params.jos_button = 0;
+		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+		break;
+
+	case 0x10:
+		_GlobalDate->jos_params.type = workMode;
+		josSendMsg(MSGID_EXT_INPUT_workModeSwitch);
 		break;
 
 	case 0x20:
@@ -900,6 +945,16 @@ void CJoystick::HK_ProcJosEvent_Button(unsigned char*  josNum)
 			_GlobalDate->jos_params.menu = true;
 		else
 			_GlobalDate->jos_params.menu = false;
+		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+		break;
+
+	case 0x40:
+		_GlobalDate->jos_params.type = ctrlMode;
+		if(_GlobalDate->jos_params.ctrlMode == mouse)
+			_GlobalDate->jos_params.ctrlMode = jos;
+		else if((_GlobalDate->jos_params.ctrlMode == jos))
+			_GlobalDate->jos_params.ctrlMode = mouse;
+		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 		break;
 
 	case 0:
@@ -909,7 +964,7 @@ void CJoystick::HK_ProcJosEvent_Button(unsigned char*  josNum)
 	default:
 		break;
 	}
-	if(josNum[usb_1_8]  || josNum[usb_special])
+	if(josNum[usb_1_8])
 		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 
 	if(josNum[usb_enter] == 0x01)
@@ -923,31 +978,71 @@ void CJoystick::HK_ProcJosEvent_Button(unsigned char*  josNum)
 
 void CJoystick::HK_procMouse_Button(unsigned char*  MouseNum)
 {
-//	case 0x02:
-		_GlobalDate->jos_params.type = mouse_button;
-		if(jse->value == 1)
+	static bool leftBut, rightBut;
+		switch(MouseNum[usb_special])
 		{
-			_GlobalDate->jos_params.mouse_button = 3;
-			_GlobalDate->jos_params.mouse_state = true;
-		}
-		else{
-			_GlobalDate->jos_params.mouse_button = 3;
-			_GlobalDate->jos_params.mouse_state = false;
-		}
-		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+		case 0x04:
+			if(leftBut)
+			{
+				_GlobalDate->jos_params.type = mouse_button;
+				_GlobalDate->jos_params.mouse_button = 3;
+				_GlobalDate->jos_params.mouse_state = false;
+				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+				leftBut = false;
+				printf("左键抬起 \n");
+			}
+			else
+			{
+				_GlobalDate->jos_params.type = mouse_button;
+				_GlobalDate->jos_params.mouse_button = 3;
+				_GlobalDate->jos_params.mouse_state = true;
+				leftBut = true;
+				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+				printf("左键按下 \n");
+			}
+			break;
 
-//	case 0x03:
-		_GlobalDate->jos_params.type = mouse_button;
-		if(jse->value == 1)
-		{
-		_GlobalDate->jos_params.mouse_button = 4;
-		_GlobalDate->jos_params.mouse_state = true;
+		case 0x08:
+			if(rightBut)
+			{
+				_GlobalDate->jos_params.type = mouse_button;
+				_GlobalDate->jos_params.mouse_button = 4;
+				_GlobalDate->jos_params.mouse_state = false;
+				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+				rightBut = false;
+				printf("右键抬起 \n");
+			}
+			else
+			{
+				_GlobalDate->jos_params.type = mouse_button;
+				_GlobalDate->jos_params.mouse_button = 4;
+				rightBut = true;
+				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+				printf("右键按下 \n");
+			}
+			break;
+
+		case 0x10:
+			_GlobalDate->jos_params.type = workMode;
+			josSendMsg(MSGID_EXT_INPUT_workModeSwitch);
+			break;
+
+		case 0x40:
+			_GlobalDate->jos_params.type = ctrlMode;
+			if(_GlobalDate->jos_params.ctrlMode == mouse)
+				_GlobalDate->jos_params.ctrlMode = jos;
+			else if((_GlobalDate->jos_params.ctrlMode == jos))
+				_GlobalDate->jos_params.ctrlMode = mouse;
+			josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+			break;
+
+		case 0:
+
+			break;
+
+		default:
+			break;
 		}
-		else{
-			_GlobalDate->jos_params.mouse_button = 4;
-			_GlobalDate->jos_params.mouse_state = false;
-		}
-		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 
 }
 
@@ -1010,6 +1105,10 @@ void CJoystick::HK_JosToSpeedX(int X)
 
 	case 0x77:
 		speed = 63;
+		break;
+
+	case 0x00:
+		speed = 0;
 		break;
 	}
 	_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AXISX) = speed;
@@ -1077,8 +1176,154 @@ void CJoystick::HK_JosToSpeedY(int Y)
 	case 0x77:
 		speed = 63;
 		break;
+
+	case 0x00:
+		speed = 0;
+		break;
 	}
 	_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AXISY) = speed;
 	josSendMsg(MSGID_EXT_INPUT_PLATCTRL);
+}
+int width = 1920, height = 1080;
+int CJoystick::HK_JosToMouseX(unsigned char x)
+{
+	int curX, delta;
+	static int x_bak;
+	static int W = width/2;
+	switch(x)
+	{
+	case 0xef:
+	case 0x11:
+		delta = 1;
+		break;
+
+	case 0xde:
+	case 0x22:
+		delta = 10;
+		break;
+
+	case 0xcd:
+	case 0x33:
+		delta = 30;
+		break;
+
+	case 0xbc:
+	case 0x44:
+		delta = 40;
+		break;
+
+	case 0xab:
+	case 0x55:
+		delta = 50;
+		break;
+
+	case 0x9a:
+	case 0x66:
+		delta = 60;
+		break;
+
+	case 0x89:
+	case 0x77:
+		delta = 70;
+		break;
+
+	case 0x00:
+		delta = 0;
+		x_bak = 0;
+		break;
+	}
+printf(" x = %x , x_bak = %x \n", x, x_bak);
+	if(x >= 0x11 && x <= 0x77)
+	{
+		printf("右\n");
+		if(x < x_bak)
+			delta = 0;
+	}
+	else if(x >= 0x89 && x < 0xef)
+	{
+		printf("左\n");
+		delta *= -1;
+		if(x > x_bak)
+			delta = 0;
+	}
+
+	W = W + delta;
+	curX = W;
+
+	if(curX > width)
+		curX = width -10;
+	else if(curX < 0)
+		curX = 0;
+
+	x_bak = x;
+	return curX;
+}
+
+int CJoystick::HK_JosToMouseY(unsigned char y)
+{
+	int curY, delta;
+	static int y_bak;
+	static int H = height/2;
+	switch(y)
+	{
+	case 0xef:
+	case 0x11:
+		delta = 5;
+		break;
+
+	case 0xde:
+	case 0x22:
+		delta = 10;
+		break;
+
+	case 0xcd:
+	case 0x33:
+		delta = 30;
+		break;
+
+	case 0xbc:
+	case 0x44:
+		delta = 40;
+		break;
+
+	case 0xab:
+	case 0x55:
+		delta = 50;
+		break;
+
+	case 0x9a:
+	case 0x66:
+		delta = 60;
+		break;
+
+	case 0x89:
+	case 0x77:
+		delta = 70;
+		break;
+
+	case 0x00:
+		delta = 0;
+		y_bak = 0;
+		break;
+	}
+	if(y >= 0x11 && y <= 0x77)
+	{
+		if(y < y_bak)
+			delta = 0;
+	}
+	else if(y >= 0x89 && y < 0xef)
+	{
+		delta *= -1;
+		if(y > y_bak)
+			delta = 0;
+	}
+	H = H + delta;
+	curY = H;
+	if(curY > height)
+		curY = height - 10;
+	else if(curY < 0)
+		curY = 0;
+	y_bak  = y;
+	return curY;
 }
 

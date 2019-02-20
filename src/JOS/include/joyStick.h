@@ -127,6 +127,8 @@ private:
     void HK_procMouse_Button(unsigned char*  MouseNum);
     void HK_JosToSpeedX(int X);
     void HK_JosToSpeedY(int Y);
+	int HK_JosToMouseX(unsigned char x);
+	int HK_JosToMouseY(unsigned char y);
 	bool Cur_pressBut;
 
 
