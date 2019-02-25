@@ -1187,6 +1187,7 @@ void CJoystick::HK_JosToSpeedY(int Y)
 int width = 1920, height = 1080;
 int CJoystick::HK_JosToMouseX(unsigned char x)
 {
+	printf("inputX = %x \n", x);
 	int curX, delta;
 	static int x_bak;
 	static int W = width/2;
@@ -1199,22 +1200,22 @@ int CJoystick::HK_JosToMouseX(unsigned char x)
 
 	case 0xde:
 	case 0x22:
-		delta = 10;
+		delta = 3;
 		break;
 
 	case 0xcd:
 	case 0x33:
-		delta = 30;
+		delta = 6;
 		break;
 
 	case 0xbc:
 	case 0x44:
-		delta = 40;
+		delta = 15;
 		break;
 
 	case 0xab:
 	case 0x55:
-		delta = 50;
+		delta = 35;
 		break;
 
 	case 0x9a:
@@ -1224,7 +1225,7 @@ int CJoystick::HK_JosToMouseX(unsigned char x)
 
 	case 0x89:
 	case 0x77:
-		delta = 70;
+		delta = 80;
 		break;
 
 	case 0x00:
@@ -1232,16 +1233,13 @@ int CJoystick::HK_JosToMouseX(unsigned char x)
 		x_bak = 0;
 		break;
 	}
-printf(" x = %x , x_bak = %x \n", x, x_bak);
 	if(x >= 0x11 && x <= 0x77)
 	{
-		printf("右\n");
 		if(x < x_bak)
 			delta = 0;
 	}
-	else if(x >= 0x89 && x < 0xef)
+	else if(x >= 0x89 && x <= 0xef)
 	{
-		printf("左\n");
 		delta *= -1;
 		if(x > x_bak)
 			delta = 0;
@@ -1256,11 +1254,13 @@ printf(" x = %x , x_bak = %x \n", x, x_bak);
 		curX = 0;
 
 	x_bak = x;
+	printf("curX = %d \n", curX);
 	return curX;
 }
 
 int CJoystick::HK_JosToMouseY(unsigned char y)
 {
+	printf("inputY = %x \n", y);
 	int curY, delta;
 	static int y_bak;
 	static int H = height/2;
@@ -1268,27 +1268,27 @@ int CJoystick::HK_JosToMouseY(unsigned char y)
 	{
 	case 0xef:
 	case 0x11:
-		delta = 5;
+		delta = 1;
 		break;
 
 	case 0xde:
 	case 0x22:
-		delta = 10;
+		delta = 3;
 		break;
 
 	case 0xcd:
 	case 0x33:
-		delta = 30;
+		delta = 6;
 		break;
 
 	case 0xbc:
 	case 0x44:
-		delta = 40;
+		delta = 15;
 		break;
 
 	case 0xab:
 	case 0x55:
-		delta = 50;
+		delta = 35;
 		break;
 
 	case 0x9a:
@@ -1298,7 +1298,7 @@ int CJoystick::HK_JosToMouseY(unsigned char y)
 
 	case 0x89:
 	case 0x77:
-		delta = 70;
+		delta = 80;
 		break;
 
 	case 0x00:
@@ -1311,7 +1311,7 @@ int CJoystick::HK_JosToMouseY(unsigned char y)
 		if(y < y_bak)
 			delta = 0;
 	}
-	else if(y >= 0x89 && y < 0xef)
+	else if(y >= 0x89 && y <= 0xef)
 	{
 		delta *= -1;
 		if(y > y_bak)
@@ -1324,6 +1324,7 @@ int CJoystick::HK_JosToMouseY(unsigned char y)
 	else if(curY < 0)
 		curY = 0;
 	y_bak  = y;
+	printf("curY = %d \n", curY);
 	return curY;
 }
 
