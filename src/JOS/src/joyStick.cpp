@@ -822,13 +822,13 @@ void CJoystick::HK_procJosEvent_Axis(unsigned char*  josNum)
 		}
 		zoom = 0;
 	}
-	else if(josNum[usb_Z] < 0x77 && josNum[usb_Z] > 0x11)
+	else if(josNum[usb_Z] <= 0x77 && josNum[usb_Z] > 0x11)
 	{
 		_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomShort ) = 1;
 		josSendMsg(MSGID_EXT_INPUT_OPTICZOOMSHORTCTRL);
 		zoom = 1;
 	}
-	else if(josNum[usb_Z] > 0xcd && josNum[usb_Z] < 0xef )
+	else if(josNum[usb_Z] >= 0x89 && josNum[usb_Z] < 0xef )
 	{
 		_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomLong ) = 1;
 		josSendMsg(MSGID_EXT_INPUT_OPTICZOOMLONGCTRL);
@@ -872,13 +872,13 @@ void CJoystick::HK_procMouse_Axis(unsigned char*  MouseNum)
 		zoom = 0;
 
 	}
-	else if(MouseNum[usb_Z] < 0x77 && MouseNum[usb_Z] > 0x11)
+	else if(MouseNum[usb_Z] <= 0x77 && MouseNum[usb_Z] > 0x11)
 	{
 		_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomShort ) = 1;
 		josSendMsg(MSGID_EXT_INPUT_OPTICZOOMSHORTCTRL);
 		zoom = 1;
 	}
-	else if(MouseNum[usb_Z] > 0xcd && MouseNum[usb_Z] < 0xef )
+	else if(MouseNum[usb_Z] >= 0x89 && MouseNum[usb_Z] < 0xef )
 	{
 		_GlobalDate->EXT_Ctrl.at(MSGID_INPUT_ZoomLong ) = 1;
 		josSendMsg(MSGID_EXT_INPUT_OPTICZOOMLONGCTRL);
