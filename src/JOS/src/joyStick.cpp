@@ -1251,7 +1251,7 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 
 
 		curX = W;
-		if(curX > width)
+		if(curX > (width - 15) )
 			W = curX = width - 15;
 		else if(curX < 0)
 			W = curX = 0;
@@ -1324,8 +1324,8 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 			H += 5;
 
 		curY = H;
-		if(curY > height)
-			H = curY = height - 15;
+		if(curY > (height - 20))
+			H = curY = height - 20;
 		else if(curY < 0)
 			H = curY = 0;
 		_GlobalDate->jos_params.cursor_y = curY;
