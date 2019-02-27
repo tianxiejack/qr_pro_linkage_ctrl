@@ -841,8 +841,6 @@ void CJoystick::HK_procJosEvent_Axis(unsigned char*  josNum)
 
 void CJoystick::HK_procMouse_Axis(unsigned char*  MouseNum)
 {
-	_GlobalDate->jos_params.type = cursor_move;
-
 	printf("send mouse params \n");
 	/***********/
 
@@ -1178,6 +1176,7 @@ int width = 1920, height = 1080;
 
 void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 {
+
 	struct timeval tmp;
 	int curX, curY;
 	static int W = width/2;
@@ -1187,31 +1186,31 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 	case 0xef:
 	case 0x11:
 		tmp.tv_sec = 0;
-		tmp.tv_usec = 100000;
+		tmp.tv_usec = 80000;
 		break;
 
 	case 0xde:
 	case 0x22:
 		tmp.tv_sec = 0;
-		tmp.tv_usec = 80000;
+		tmp.tv_usec = 60000;
 		break;
 
 	case 0xcd:
 	case 0x33:
 		tmp.tv_sec = 0;
-		tmp.tv_usec = 50000;
+		tmp.tv_usec = 40000;
 		break;
 
 	case 0xbc:
 	case 0x44:
 		tmp.tv_sec = 0;
-		tmp.tv_usec = 40000;
+		tmp.tv_usec = 30000;
 		break;
 
 	case 0xab:
 	case 0x55:
 		tmp.tv_sec = 0;
-		tmp.tv_usec = 30000;
+		tmp.tv_usec = 20000;
 		break;
 
 	case 0x9a:
@@ -1237,23 +1236,31 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 	else if(x>= 0x11 && x <= 0x77 )
 		W += 1;
 
-	if(x == 0x89)
+	if(x == 0xab)
+		W -= 2;
+	else if (x == 0x55)
+		W += 2;
+	else if(x == 0x9a)
 		W -= 3;
-	else if(x == 0x77)
+	else if(x == 0x66)
 		W += 3;
+	else if(x == 0x89)
+		W -= 5;
+	else if(x == 0x77)
+		W += 5;
 
 
 		curX = W;
 		if(curX > width)
-			curX = width -10;
+			W = curX = width - 15;
 		else if(curX < 0)
-			curX = 0;
+			W = curX = 0;
 		_GlobalDate->jos_params.cursor_x = curX;
+		_GlobalDate->jos_params.type = cursor_move;
 		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 
 		switch(y)
 		{
-		printf(" y =%x \n", y);
 		case 0xef:
 		case 0x11:
 			tmp.tv_sec = 0;
@@ -1263,37 +1270,37 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 		case 0xde:
 		case 0x22:
 			tmp.tv_sec = 0;
-			tmp.tv_usec = 250000;
+			tmp.tv_usec = 80000;
 			break;
 
 		case 0xcd:
 		case 0x33:
 			tmp.tv_sec = 0;
-			tmp.tv_usec = 125000;
+			tmp.tv_usec = 50000;
 			break;
 
 		case 0xbc:
 		case 0x44:
 			tmp.tv_sec = 0;
-			tmp.tv_usec = 62000;
+			tmp.tv_usec = 40000;
 			break;
 
 		case 0xab:
 		case 0x55:
 			tmp.tv_sec = 0;
-			tmp.tv_usec = 31000;
+			tmp.tv_usec = 30000;
 			break;
 
 		case 0x9a:
 		case 0x66:
 			tmp.tv_sec = 0;
-			tmp.tv_usec = 15000;
+			tmp.tv_usec = 10000;
 			break;
 
 		case 0x89:
 		case 0x77:
 			tmp.tv_sec = 0;
-			tmp.tv_usec = 8000;
+			tmp.tv_usec = 5000;
 			break;
 
 		case 0x00:
@@ -1307,17 +1314,22 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 		else if(y>= 0x11 && y <= 0x77 )
 			H += 1;
 
-		if(y == 0x89)
+		if(y == 0x9a)
 			H -= 3;
-		else if( y == 0x77)
+		else if(y == 0x66)
 			H += 3;
+		else if(y == 0x89)
+			H -= 5;
+		else if( y == 0x77)
+			H += 5;
 
 		curY = H;
 		if(curY > height)
-			curY = height - 10;
+			H = curY = height - 15;
 		else if(curY < 0)
-			curY = 0;
+			H = curY = 0;
 		_GlobalDate->jos_params.cursor_y = curY;
+		_GlobalDate->jos_params.type = cursor_move;
 		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 
 		select(0, NULL, NULL, NULL, &tmp);
@@ -1326,6 +1338,9 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 
 void CJoystick::HK_JosMap()
 {
-	if(jos_date[usb_X] || jos_date[usb_Y])
-		HK_JosToMouse(jos_date[usb_X], jos_date[usb_Y]);
+	//if(!_GlobalDate->jos_params.menu)
+//	{
+		if(jos_date[usb_X] || jos_date[usb_Y])
+			HK_JosToMouse(jos_date[usb_X], jos_date[usb_Y]);
+//	}
 }
