@@ -841,8 +841,11 @@ void CJoystick::HK_procJosEvent_Axis(unsigned char*  josNum)
 
 void CJoystick::HK_procMouse_Axis(unsigned char*  MouseNum)
 {
-	/***********/
 	_GlobalDate->jos_params.type = cursor_move;
+
+	printf("send mouse params \n");
+	/***********/
+
 	static int zoom = 0;
 	if(MouseNum[usb_Z] == 0)
 	{
@@ -1183,7 +1186,6 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 	{
 	case 0xef:
 	case 0x11:
-		printf("x = %x  \n", x);
 		tmp.tv_sec = 0;
 		tmp.tv_usec = 100000;
 		break;
@@ -1191,42 +1193,41 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 	case 0xde:
 	case 0x22:
 		tmp.tv_sec = 0;
-		tmp.tv_usec = 250000;
+		tmp.tv_usec = 80000;
 		break;
 
 	case 0xcd:
 	case 0x33:
 		tmp.tv_sec = 0;
-		tmp.tv_usec = 125000;
+		tmp.tv_usec = 50000;
 		break;
 
 	case 0xbc:
 	case 0x44:
 		tmp.tv_sec = 0;
-		tmp.tv_usec = 62000;
+		tmp.tv_usec = 40000;
 		break;
 
 	case 0xab:
 	case 0x55:
 		tmp.tv_sec = 0;
-		tmp.tv_usec = 31000;
+		tmp.tv_usec = 30000;
 		break;
 
 	case 0x9a:
 	case 0x66:
 		tmp.tv_sec = 0;
-		tmp.tv_usec = 15000;
+		tmp.tv_usec = 10000;
 		break;
 
 	case 0x89:
 	case 0x77:
 		tmp.tv_sec = 0;
-		tmp.tv_usec = 8000;
+		tmp.tv_usec = 5000;
 		break;
 
 	case 0x00:
-		tmp.tv_sec = 0;
-		tmp.tv_usec = 500000;
+
 		break;
 	}
 
@@ -1235,6 +1236,12 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 		W -= 1;
 	else if(x>= 0x11 && x <= 0x77 )
 		W += 1;
+
+	if(x == 0x89)
+		W -= 3;
+	else if(x == 0x77)
+		W += 3;
+
 
 		curX = W;
 		if(curX > width)
@@ -1290,8 +1297,7 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 			break;
 
 		case 0x00:
-			tmp.tv_sec = 0;
-			tmp.tv_usec = 500000;
+
 			break;
 		}
 
@@ -1300,6 +1306,12 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 			H -= 1;
 		else if(y>= 0x11 && y <= 0x77 )
 			H += 1;
+
+		if(y == 0x89)
+			H -= 3;
+		else if( y == 0x77)
+			H += 3;
+
 		curY = H;
 		if(curY > height)
 			curY = height - 10;
@@ -1312,33 +1324,8 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 
 }
 
-int CJoystick::HK_JosToMouseY(unsigned char y)
-{
-	printf("inputY = %x \n", y);
-	int curY, delta;
-	static int y_bak;
-	static int H = height/2;
-
-	if(y >= 0x11 && y <= 0x77)
-	{
-		if(y < y_bak)
-			delta = 0;
-	}
-	else if(y >= 0x89 && y <= 0xef)
-	{
-		delta *= -1;
-		if(y > y_bak)
-			delta = 0;
-	}
-	H = H + delta;
-	curY = H;
-
-	y_bak  = y;
-	printf("curY = %d \n", curY);
-	return curY;
-}
-
 void CJoystick::HK_JosMap()
 {
-	HK_JosToMouse(jos_date[usb_X], jos_date[usb_Y]);
+	if(jos_date[usb_X] || jos_date[usb_Y])
+		HK_JosToMouse(jos_date[usb_X], jos_date[usb_Y]);
 }

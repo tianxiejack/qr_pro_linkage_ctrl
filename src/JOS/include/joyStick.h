@@ -128,7 +128,6 @@ private:
     void HK_JosToSpeedX(int X);
     void HK_JosToSpeedY(int Y);
 	void HK_JosToMouse(unsigned char x, unsigned char y);
-	int HK_JosToMouseY(unsigned char y);
 	void HK_JosMap();
 	bool Cur_pressBut;
 
