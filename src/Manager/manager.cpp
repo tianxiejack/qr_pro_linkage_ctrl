@@ -1111,20 +1111,6 @@ void CManager::usd_API_queryPos()
 
 void CManager::usd_API_WORKMODEWITCH()
 {
-	m_GlobalDate->workMode = (m_GlobalDate->workMode + 1)%3;
-	m_GlobalDate->jos_params.type = workMode;
-	switch(m_GlobalDate->workMode)
-	{
-	case 0:
-		m_GlobalDate->workMode = 1;
-		break;
-	case 1:
-		m_GlobalDate->workMode = 2;
-		break;
-	case 2:
-		m_GlobalDate->workMode = 3;
-		break;
-	}
 	switch(m_GlobalDate->workMode)
 	{
 	case 0x01:
@@ -1142,6 +1128,7 @@ void CManager::usd_API_WORKMODEWITCH()
 		m_GlobalDate->jos_params.workMode = ballctrl;
 		break;
 	}
+	m_GlobalDate->jos_params.type = workMode;
 	usd_API_ctrlParams();
 }
 

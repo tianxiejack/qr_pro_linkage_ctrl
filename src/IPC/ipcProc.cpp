@@ -499,6 +499,7 @@ int CIPCProc::ipcSendJosParams()
 	test.cmd_ID = josctrl;
 	memcpy(test.param,&_GlobalDate->jos_params , sizeof(_GlobalDate->jos_params));
 	ipc_sendmsg(&test, IPC_TOIMG_MSG);
+
 	return 0;
 }
 
