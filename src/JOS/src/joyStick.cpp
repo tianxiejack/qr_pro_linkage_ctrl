@@ -11,6 +11,7 @@ CStatusManager* CJoystick::_StatusManager = 0;
 
 bool CJoystick::JosStart = true;
 bool CJoystick::HKJosStart = true;
+unsigned char jos_date[64] = {};
 
 CJoystick::CJoystick()
 {
@@ -726,6 +727,7 @@ int CJoystick::USB_run()
 {
 	int iRet;
 	iRet = OSA_thrCreate(&HK_thrJoy, HK_josEventFunc , 0, 0, (void*)this);
+	OSA_thrCreate(&HK_thrJoyMap, HK_josMapEventFunc , 0, 0, (void*)this);
 		if(iRet != 0)
 	printf(" [joystick_USB] jos thread create failed\n");
 	return 0;
@@ -735,7 +737,6 @@ int CJoystick::HKJoystickProcess()
 {
 	int rv;
 	int length;
-	unsigned char jos_date[64] = {};
 	rv =  libusb_interrupt_transfer(g_usb_handle,user_device.bInEndpointAddress,jos_date,8,&length,10000000);
 	if(rv < 0) {
 		printf("*** bulk_transfer failed!   rv = %d \n",rv);
@@ -840,22 +841,8 @@ void CJoystick::HK_procJosEvent_Axis(unsigned char*  josNum)
 
 void CJoystick::HK_procMouse_Axis(unsigned char*  MouseNum)
 {
-	if(MouseNum[usb_X])
-	{
-		_GlobalDate->jos_params.type = cursor_move;
-		_GlobalDate->jos_params.cursor_x = HK_JosToMouseX(MouseNum[usb_X]);
-		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
-	}
-
-	if(MouseNum[usb_Y])
-	{
-		_GlobalDate->jos_params.type = cursor_move;
-		_GlobalDate->jos_params.cursor_y = HK_JosToMouseY(MouseNum[usb_Y]);
-		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
-	}
-
 	/***********/
-
+	_GlobalDate->jos_params.type = cursor_move;
 	static int zoom = 0;
 	if(MouseNum[usb_Z] == 0)
 	{
@@ -894,7 +881,7 @@ void CJoystick::HK_ProcJosEvent_Button(unsigned char*  josNum)
 	switch(josNum[usb_1_8])
 	{
 		case 0x01:
-					_GlobalDate->jos_params.jos_button = 1;
+				_GlobalDate->jos_params.jos_button = 1;
 				break;
 		case 0x02:
 				_GlobalDate->jos_params.jos_button = 2;
@@ -1185,77 +1172,144 @@ void CJoystick::HK_JosToSpeedY(int Y)
 	josSendMsg(MSGID_EXT_INPUT_PLATCTRL);
 }
 int width = 1920, height = 1080;
-int CJoystick::HK_JosToMouseX(unsigned char x)
+
+void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 {
-	printf("inputX = %x \n", x);
-	int curX, delta;
-	static int x_bak;
+	struct timeval tmp;
+	int curX, curY;
 	static int W = width/2;
+	printf("x = %x  y = %x \n", x, y);
 	switch(x)
 	{
 	case 0xef:
 	case 0x11:
-		delta = 1;
+		printf("x = %x  \n", x);
+		tmp.tv_sec = 0;
+		tmp.tv_usec = 100000;
 		break;
 
 	case 0xde:
 	case 0x22:
-		delta = 3;
+		tmp.tv_sec = 0;
+		tmp.tv_usec = 250000;
 		break;
 
 	case 0xcd:
 	case 0x33:
-		delta = 6;
+		tmp.tv_sec = 0;
+		tmp.tv_usec = 125000;
 		break;
 
 	case 0xbc:
 	case 0x44:
-		delta = 15;
+		tmp.tv_sec = 0;
+		tmp.tv_usec = 62000;
 		break;
 
 	case 0xab:
 	case 0x55:
-		delta = 35;
+		tmp.tv_sec = 0;
+		tmp.tv_usec = 31000;
 		break;
 
 	case 0x9a:
 	case 0x66:
-		delta = 60;
+		tmp.tv_sec = 0;
+		tmp.tv_usec = 15000;
 		break;
 
 	case 0x89:
 	case 0x77:
-		delta = 80;
+		tmp.tv_sec = 0;
+		tmp.tv_usec = 8000;
 		break;
 
 	case 0x00:
-		delta = 0;
-		x_bak = 0;
+		tmp.tv_sec = 0;
+		tmp.tv_usec = 500000;
 		break;
 	}
-	if(x >= 0x11 && x <= 0x77)
-	{
-		if(x < x_bak)
-			delta = 0;
-	}
-	else if(x >= 0x89 && x <= 0xef)
-	{
-		delta *= -1;
-		if(x > x_bak)
-			delta = 0;
-	}
 
-	W = W + delta;
-	curX = W;
 
-	if(curX > width)
-		curX = width -10;
-	else if(curX < 0)
-		curX = 0;
+	if(x >= 0x89 && x <= 0xef)
+		W -= 1;
+	else if(x>= 0x11 && x <= 0x77 )
+		W += 1;
 
-	x_bak = x;
-	printf("curX = %d \n", curX);
-	return curX;
+		curX = W;
+		if(curX > width)
+			curX = width -10;
+		else if(curX < 0)
+			curX = 0;
+		_GlobalDate->jos_params.cursor_x = curX;
+		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+
+		switch(y)
+		{
+		printf(" y =%x \n", y);
+		case 0xef:
+		case 0x11:
+			tmp.tv_sec = 0;
+			tmp.tv_usec = 100000;
+			break;
+
+		case 0xde:
+		case 0x22:
+			tmp.tv_sec = 0;
+			tmp.tv_usec = 250000;
+			break;
+
+		case 0xcd:
+		case 0x33:
+			tmp.tv_sec = 0;
+			tmp.tv_usec = 125000;
+			break;
+
+		case 0xbc:
+		case 0x44:
+			tmp.tv_sec = 0;
+			tmp.tv_usec = 62000;
+			break;
+
+		case 0xab:
+		case 0x55:
+			tmp.tv_sec = 0;
+			tmp.tv_usec = 31000;
+			break;
+
+		case 0x9a:
+		case 0x66:
+			tmp.tv_sec = 0;
+			tmp.tv_usec = 15000;
+			break;
+
+		case 0x89:
+		case 0x77:
+			tmp.tv_sec = 0;
+			tmp.tv_usec = 8000;
+			break;
+
+		case 0x00:
+			tmp.tv_sec = 0;
+			tmp.tv_usec = 500000;
+			break;
+		}
+
+		static int H = height/2;
+		if(y >= 0x89 && y <= 0xef)
+			H -= 1;
+		else if(y>= 0x11 && y <= 0x77 )
+			H += 1;
+		curY = H;
+		if(curY > height)
+			curY = height - 10;
+		else if(curY < 0)
+			curY = 0;
+		_GlobalDate->jos_params.cursor_y = curY;
+		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+
+		select(0, NULL, NULL, NULL, &tmp);
+
 }
 
 int CJoystick::HK_JosToMouseY(unsigned char y)
@@ -1264,48 +1318,7 @@ int CJoystick::HK_JosToMouseY(unsigned char y)
 	int curY, delta;
 	static int y_bak;
 	static int H = height/2;
-	switch(y)
-	{
-	case 0xef:
-	case 0x11:
-		delta = 1;
-		break;
 
-	case 0xde:
-	case 0x22:
-		delta = 3;
-		break;
-
-	case 0xcd:
-	case 0x33:
-		delta = 6;
-		break;
-
-	case 0xbc:
-	case 0x44:
-		delta = 15;
-		break;
-
-	case 0xab:
-	case 0x55:
-		delta = 35;
-		break;
-
-	case 0x9a:
-	case 0x66:
-		delta = 60;
-		break;
-
-	case 0x89:
-	case 0x77:
-		delta = 80;
-		break;
-
-	case 0x00:
-		delta = 0;
-		y_bak = 0;
-		break;
-	}
 	if(y >= 0x11 && y <= 0x77)
 	{
 		if(y < y_bak)
@@ -1319,12 +1332,13 @@ int CJoystick::HK_JosToMouseY(unsigned char y)
 	}
 	H = H + delta;
 	curY = H;
-	if(curY > height)
-		curY = height - 10;
-	else if(curY < 0)
-		curY = 0;
+
 	y_bak  = y;
 	printf("curY = %d \n", curY);
 	return curY;
 }
 
+void CJoystick::HK_JosMap()
+{
+	HK_JosToMouse(jos_date[usb_X], jos_date[usb_Y]);
+}

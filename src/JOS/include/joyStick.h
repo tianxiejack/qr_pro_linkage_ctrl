@@ -127,8 +127,9 @@ private:
     void HK_procMouse_Button(unsigned char*  MouseNum);
     void HK_JosToSpeedX(int X);
     void HK_JosToSpeedY(int Y);
-	int HK_JosToMouseX(unsigned char x);
+	void HK_JosToMouse(unsigned char x, unsigned char y);
 	int HK_JosToMouseY(unsigned char y);
+	void HK_JosMap();
 	bool Cur_pressBut;
 
 
@@ -152,6 +153,20 @@ private:
 		return  NULL;
 	}
 
+	OSA_ThrHndl HK_thrJoyMap;
+	static void *HK_josMapEventFunc(void *context)
+	{
+		CJoystick *User = (CJoystick*)context;
+		struct timeval thrJosMap;
+		while(HKJosStart){
+			thrJosMap.tv_sec = 0;
+			thrJosMap.tv_usec = 10000;
+			select(0, NULL, NULL, NULL, &thrJosMap);
+			User->HK_JosMap();
+
+		}
+		return  NULL;
+	}
 
 };
 
