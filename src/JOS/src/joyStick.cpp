@@ -1004,6 +1004,7 @@ void CJoystick::HK_procMouse_Button(unsigned char*  MouseNum)
 			{
 				_GlobalDate->jos_params.type = mouse_button;
 				_GlobalDate->jos_params.mouse_button = 4;
+				_GlobalDate->jos_params.mouse_state = true;
 				rightBut = true;
 				josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 				printf("右键按下 \n");
