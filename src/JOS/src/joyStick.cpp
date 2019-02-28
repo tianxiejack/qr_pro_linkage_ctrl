@@ -1269,33 +1269,33 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 
 
 	if(x == 0xef)
-		W -= 1;
-	else if(x== 0x11)
-		W += 1;
-	else if(x == 0xde)
 		W -= 2;
-	else if(x == 0x22)
+	else if(x== 0x11)
 		W += 2;
-	else if(x == 0xcd)
+	else if(x == 0xde)
 		W -= 3;
-	else if(x == 0x33)
+	else if(x == 0x22)
 		W += 3;
-	else if (x == 0xbc)
+	else if(x == 0xcd)
 		W -= 4;
-	else if(x == 0x44)
+	else if(x == 0x33)
 		W += 4;
-	else if(x == 0xab)
+	else if (x == 0xbc)
 		W -= 5;
-	else if (x == 0x55)
+	else if(x == 0x44)
 		W += 5;
-	else if(x == 0x9a)
+	else if(x == 0xab)
 		W -= 6;
-	else if(x == 0x66)
+	else if (x == 0x55)
 		W += 6;
-	else if(x == 0x89)
+	else if(x == 0x9a)
 		W -= 7;
-	else if(x == 0x77)
+	else if(x == 0x66)
 		W += 7;
+	else if(x == 0x89)
+		W -= 8;
+	else if(x == 0x77)
+		W += 8;
 
 
 		curX = W;
@@ -1359,33 +1359,33 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 		static int H = height/2;
 
 		if(y == 0xef)
-			H -= 1;
-		else if(y == 0x11)
-			H += 1;
-		else if(y == 0xde)
 			H -= 2;
-		else if(y == 0x22)
+		else if(y == 0x11)
 			H += 2;
-		else if(y == 0xcd)
+		else if(y == 0xde)
 			H -= 3;
-		else if(y == 0x33)
+		else if(y == 0x22)
 			H += 3;
-		else if(y == 0xbc)
+		else if(y == 0xcd)
 			H -= 4;
-		else if( y== 0x44)
+		else if(y == 0x33)
 			H += 4;
-		else if(y == 0xab)
+		else if(y == 0xbc)
 			H -= 5;
-		else if(y == 0x55)
+		else if( y== 0x44)
 			H += 5;
-		else if(y == 0x9a)
+		else if(y == 0xab)
 			H -= 6;
-		else if(y == 0x66)
+		else if(y == 0x55)
 			H += 6;
-		else if(y == 0x89)
+		else if(y == 0x9a)
 			H -= 7;
-		else if( y == 0x77)
+		else if(y == 0x66)
 			H += 7;
+		else if(y == 0x89)
+			H -= 8;
+		else if( y == 0x77)
+			H += 8;
 
 		curY = H;
 		if(curY > (height - 20))
