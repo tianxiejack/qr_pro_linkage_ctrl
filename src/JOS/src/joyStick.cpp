@@ -749,9 +749,6 @@ int CJoystick::HKJoystickProcess()
 		else if(jos_date[usb_X] || jos_date[usb_Y] || jos_date[usb_Z])
 			Cur_pressBut = false;
 
-		printf("_GlobalDate->gridMap = %d \n", _GlobalDate->gridMap);
-
-
     	if(_GlobalDate->jos_params.ctrlMode == mouse)
     	{
     			HK_procMouse_Axis(jos_date);
