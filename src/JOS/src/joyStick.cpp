@@ -749,6 +749,8 @@ int CJoystick::HKJoystickProcess()
 		else if(jos_date[usb_X] || jos_date[usb_Y] || jos_date[usb_Z])
 			Cur_pressBut = false;
 
+		printf("_GlobalDate->gridMap = %d \n", _GlobalDate->gridMap);
+
 
     	if(_GlobalDate->jos_params.ctrlMode == mouse)
     	{
@@ -783,7 +785,7 @@ void CJoystick::HK_procJosEvent_Axis(unsigned char*  josNum)
 		Yinit = false;
 		HK_JosToSpeedY(josNum[usb_Y]);
 	}
-	else if(_GlobalDate->jos_params.menu)
+	else if(_GlobalDate->jos_params.menu && !_GlobalDate->gridMap)
 	{
 		_GlobalDate->jos_params.type = jos_Dir;
 		if(josNum[usb_Y] > 0x77)
@@ -809,6 +811,24 @@ void CJoystick::HK_procJosEvent_Axis(unsigned char*  josNum)
 			dirLimit = false;
 			_GlobalDate->jos_params.jos_Dir = 0;
 		}
+	}
+	else if(_GlobalDate->gridMap)
+	{
+		if(Xinit)
+			josNum[usb_X] = 0;
+		Xinit = false;
+		HK_JosToSpeedX(josNum[usb_X]);
+
+		if(Yinit)
+			josNum[usb_Y] = 0;
+		Yinit = false;
+		HK_JosToSpeedY(josNum[usb_Y]);
+#if 0
+		if(_GlobalDate->gridMap)
+			_GlobalDate->jos_params.ctrlMode = jos;
+		else
+			_GlobalDate->jos_params.ctrlMode = mouse;
+#endif
 	}
 	/***********/
 	static int zoom = 0;

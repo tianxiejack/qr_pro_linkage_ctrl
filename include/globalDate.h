@@ -258,6 +258,7 @@ int host_ctrl;
 int workMode;
 int outputMode;
 int chid_camera;
+int gridMap;
 unsigned char MtdSetAreaBox;
 unsigned char MtdWait;
 unsigned char ScenceTrkWait;

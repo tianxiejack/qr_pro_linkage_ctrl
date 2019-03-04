@@ -216,6 +216,10 @@ void CIPCProc::getIPCMsgProc()
 			_Message->MSGDRIV_send(MSGID_IPC_INPUT_ballparam, 0);
 			break;
 
+ 		case enter_gridmap_view:
+ 			_GlobalDate->gridMap = fr_img_test.param[0];
+ 			break;
+
 	    default:
 	        break;
         }
