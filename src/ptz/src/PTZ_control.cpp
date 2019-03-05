@@ -510,19 +510,19 @@ int CPTZControl::getPanSpeed(Uint16 deltax)
 	if(deltax < 100)
 		return 0;
 	if( deltax <200)
-		return 12;
+		return 8;
 	else if( deltax <500)
-		return 25;
+		return 15;
 	else if( deltax <1500)
-		return 35;
+		return 25;
 	else if( deltax <3000)
-		return 40;
+		return 30;
 	else if( deltax <5000)
-		return 55;
+		return 40;
 	else if( deltax <10000)
-		return 55;
-	else
-		return 60;
+		return 45;
+	//else
+		//return 60;
 }
 
 
@@ -531,19 +531,19 @@ int CPTZControl::getTilSpeed(Uint16 deltay)
 	if(deltay < 100)
 		return 0;
 	if( deltay <200)
-		return 12;
+		return 8;
 	else if( deltay <500)
-		return 30;
+		return 20;
 	else if( deltay <1500)
-		return 40;
+		return 30;
 	else if( deltay <3000)
-		return 40;
+		return 35;
 	else if( deltay <5000)
-		return 45;
+		return 40;
 	else if( deltay <9000)
-		return 55;
-	else
-		return 60;
+		return 45;
+	//else
+		//return 60;
 }
 
 

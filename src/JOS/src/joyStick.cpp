@@ -858,7 +858,6 @@ void CJoystick::HK_procJosEvent_Axis(unsigned char*  josNum)
 
 }
 
-
 void CJoystick::HK_procMouse_Axis(unsigned char*  MouseNum)
 {
 	/***********/
@@ -1302,17 +1301,17 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 	else if(x == 0x44)
 		W += 5;
 	else if(x == 0xab)
-		W -= 6;
+		W -= 10;
 	else if (x == 0x55)
-		W += 6;
+		W += 10;
 	else if(x == 0x9a)
-		W -= 7;
+		W -= 15;
 	else if(x == 0x66)
-		W += 7;
+		W += 15;
 	else if(x == 0x89)
-		W -= 8;
+		W -= 20;
 	else if(x == 0x77)
-		W += 8;
+		W += 20;
 
 
 		curX = W;
@@ -1392,17 +1391,17 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 		else if( y== 0x44)
 			H += 5;
 		else if(y == 0xab)
-			H -= 6;
+			H -= 10;
 		else if(y == 0x55)
-			H += 6;
+			H += 10;
 		else if(y == 0x9a)
-			H -= 7;
+			H -= 15;
 		else if(y == 0x66)
-			H += 7;
+			H += 15;
 		else if(y == 0x89)
-			H -= 8;
+			H -= 18;
 		else if( y == 0x77)
-			H += 8;
+			H += 18;
 
 		curY = H;
 		if(curY > (height - 20))
