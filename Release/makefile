@@ -70,7 +70,7 @@ all: linkage_ctrl
 linkage_ctrl: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: NVCC Linker'
-	/usr/local/cuda-8.0/bin/nvcc --cudart static -L/sur/local/lib/ -Xlinker -rpath=/usr/lib/aarch64-linux-gnu/tegra --relocatable-device-code=false -gencode arch=compute_20,code=compute_20 -gencode arch=compute_53,code=compute_53 -gencode arch=compute_20,code=sm_20 -gencode arch=compute_53,code=sm_53 -m64 -ccbin aarch64-linux-gnu-g++ -link -o  "linkage_ctrl" $(OBJS) $(USER_OBJS) $(LIBS)
+	/usr/local/cuda-8.0/bin/nvcc --cudart static -L/usr/local/lib/ -L../usr/local/lib/ -Xlinker -rpath=/usr/lib/aarch64-linux-gnu/tegra --relocatable-device-code=false -gencode arch=compute_20,code=compute_20 -gencode arch=compute_53,code=compute_53 -gencode arch=compute_20,code=sm_20 -gencode arch=compute_53,code=sm_53 -m64 -ccbin aarch64-linux-gnu-g++ -link -o  "linkage_ctrl" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
