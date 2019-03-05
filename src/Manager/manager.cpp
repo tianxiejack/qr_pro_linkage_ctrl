@@ -1591,7 +1591,7 @@ void CManager::usd_API_MTDMode()
 			thrCreate_LinkageSpeedLoop();
 		m_GlobalDate->MtdAutoLoop = true;
 		dtimer.startTimer(swtarget_id, m_GlobalDate->mtdconfig.trktime);
-		printf("start time  = %d \n", m_GlobalDate->mtdconfig.trktime);
+		//printf("start time  = %d \n", m_GlobalDate->mtdconfig.trktime);
 			}
 
 		}

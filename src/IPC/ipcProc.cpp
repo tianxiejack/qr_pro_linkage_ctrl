@@ -106,7 +106,6 @@ void CIPCProc::getIPCMsgProc()
             case trk:
                 break;
             case sectrk:
-            	//sThis->signalFeedBack(ACK_TrkSearchStatus, ACK_TrkSearch_value, 0, 0);
                 break;
             case enh:
                 memcpy(&fr_img_cmd_enh, fr_img_test.param, sizeof(fr_img_cmd_enh));
@@ -127,14 +126,11 @@ void CIPCProc::getIPCMsgProc()
         		ipc_gettrack(&trackstatus,&trackposx,&trackposy);//get value from shared_memory
         		//printf("IPC  ==>  trackposx = %f,   trackposy = %f\n", trackposx, trackposy);
         		_Message->MSGDRIV_send(MSGID_IPC_INPUT_TRACKCTRL, 0);
-        		//sThis->signalFeedBack(ACK_avtErrorOutput, 0, 0, 0);
         		break;
 
      		case sensor:
-     			//sThis->signalFeedBack(ACK_mainVideoStatus, 0, 0, 0);
      			break;
      		case trktype:
-     			//sThis->signalFeedBack(ACK_avtTrkType, 0, 0, 0);
      			break;
      		case mouseptz:
      			memcpy(&_GlobalDate->ipc_mouseptz, &fr_img_test.param, sizeof(cmd_mouseptz));
@@ -184,7 +180,6 @@ void CIPCProc::getIPCMsgProc()
      			break;
      		case read_shm_osdtext:
      			_GlobalDate->recvOsdbuf.osdID = fr_img_test.param[0];
-     		//	printf("ipc==> ID = %d\n", fr_img_test.param[0]);
      			_Message->MSGDRIV_send(MSGID_IPC_INPUT_NameAndPos, 0);
      			break;
      		case ipcwordSize:

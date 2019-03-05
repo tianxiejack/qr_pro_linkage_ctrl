@@ -229,8 +229,8 @@ private:
 			{
 				int pan = m_GlobalDate->linkagePos.panPos;
 				int Tilt = m_GlobalDate->linkagePos.tilPos;
-				//sThis->m_ptz->QueryPos();
-				sThis->m_ptz->ptzSetSpeed(pan, Tilt);
+				//sThis->m_ptz->ptzSetSpeed(pan, Tilt);
+				sThis->m_ptz->ptzSetPos(pan, Tilt);
 			}
 		}
 

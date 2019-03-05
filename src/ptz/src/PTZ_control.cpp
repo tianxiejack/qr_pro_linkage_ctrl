@@ -715,7 +715,7 @@ void CPTZControl::ptzSetSpeed(Uint16 Inputx, Uint16 Inputy)
 	SendCmd(m_pReqMove, PELCO_RESPONSE_Null);
 
 //pan
-	//printf("m_iPanPos   =  %d,      m_iTiltPos   =    %d,    deltaPan  =   %d,    deltaTil   =  %d   \n", m_iPanPos, m_iTiltPos, deltaPan, deltaTil);
+	printf("m_iPanPos   =  %d,      m_iTiltPos   =    %d,    deltaPan  =   %d,    deltaTil   =  %d   \n", m_iPanPos, m_iTiltPos, deltaPan, deltaTil);
 	if(m_iPanPos >= 18000 && Inputx >= 18000)
 	{
 		if(deltaPan > 100)
