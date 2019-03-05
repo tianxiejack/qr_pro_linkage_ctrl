@@ -556,6 +556,13 @@ int CIPCProc::IpcSwitchTarget()
 	memset(test.param, 0, PARAMLEN);
 	test.cmd_ID = switchtarget;
 	ipc_sendmsg(&test, IPC_TOIMG_MSG);
+#if 0
+	printf("\n");
+	printf("\n");
+	printf("#############  switch target    #############\n");
+	printf("\n");
+	printf("\n");
+#endif
 	return 0;
 }
 	

@@ -507,12 +507,12 @@ void CPTZControl::ptzSetPos(Uint16 posx, Uint16 posy)
 }
 int CPTZControl::getPanSpeed(Uint16 deltax)
 {
-	if(deltax < 100)
+	if(deltax <= 100)
 		return 0;
 	if( deltax <200)
-		return 8;
-	else if( deltax <500)
 		return 15;
+	else if( deltax <500)
+		return 20;
 	else if( deltax <1500)
 		return 25;
 	else if( deltax <3000)
@@ -520,30 +520,30 @@ int CPTZControl::getPanSpeed(Uint16 deltax)
 	else if( deltax <5000)
 		return 40;
 	else if( deltax <10000)
-		return 45;
-	//else
-		//return 60;
+		return 50;
+	else
+		return 55;
 }
 
 
 int CPTZControl::getTilSpeed(Uint16 deltay)
 {
-	if(deltay < 100)
+	if(deltay <= 100)
 		return 0;
 	if( deltay <200)
-		return 8;
+		return 15;
 	else if( deltay <500)
 		return 20;
 	else if( deltay <1500)
-		return 30;
-	else if( deltay <3000)
 		return 35;
-	else if( deltay <5000)
-		return 40;
-	else if( deltay <9000)
+	else if( deltay <3000)
 		return 45;
-	//else
-		//return 60;
+	else if( deltay <5000)
+		return 50;
+	else if( deltay <9000)
+		return 52;
+	else
+		return 55;
 }
 
 
@@ -711,11 +711,12 @@ void CPTZControl::ptzSetSpeed(Uint16 Inputx, Uint16 Inputy)
 	m_data2Code = min(stop, 63);
 
 	p_D->PktFormat(m_pReqMove, m_cmd1Code, m_cmd2Code, m_data1Code, m_data2Code, m_byAddr);
-
 	SendCmd(m_pReqMove, PELCO_RESPONSE_Null);
+	if(!m_data1Code && !m_data2Code)
+		ptzStop();
 
 //pan
-	printf("m_iPanPos   =  %d,      m_iTiltPos   =    %d,    deltaPan  =   %d,    deltaTil   =  %d   \n", m_iPanPos, m_iTiltPos, deltaPan, deltaTil);
+	//printf("m_iPanPos   =  %d,      m_iTiltPos   =    %d,    deltaPan  =   %d,    deltaTil   =  %d   \n", m_iPanPos, m_iTiltPos, deltaPan, deltaTil);
 	if(m_iPanPos >= 18000 && Inputx >= 18000)
 	{
 		if(deltaPan > 100)
