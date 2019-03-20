@@ -1239,31 +1239,31 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 	case 0xef:
 	case 0x11:
 		tmp.tv_sec = 0;
-		tmp.tv_usec = 80000;
+		tmp.tv_usec = 90000;
 		break;
 
 	case 0xde:
 	case 0x22:
 		tmp.tv_sec = 0;
-		tmp.tv_usec = 50000;
+		tmp.tv_usec = 60000;
 		break;
 
 	case 0xcd:
 	case 0x33:
 		tmp.tv_sec = 0;
-		tmp.tv_usec = 40000;
+		tmp.tv_usec = 50000;
 		break;
 
 	case 0xbc:
 	case 0x44:
 		tmp.tv_sec = 0;
-		tmp.tv_usec = 30000;
+		tmp.tv_usec = 40000;
 		break;
 
 	case 0xab:
 	case 0x55:
 		tmp.tv_sec = 0;
-		tmp.tv_usec = 20000;
+		tmp.tv_usec = 30000;
 		break;
 
 	case 0x9a:
@@ -1275,7 +1275,7 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 	case 0x89:
 	case 0x77:
 		tmp.tv_sec = 0;
-		tmp.tv_usec = 5000;
+		tmp.tv_usec = 10000;
 		break;
 
 	case 0x00:
@@ -1285,13 +1285,13 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 
 
 	if(x == 0xef)
-		W -= 2;
+		W -= 1;
 	else if(x== 0x11)
-		W += 2;
+		W += 1;
 	else if(x == 0xde)
-		W -= 3;
+		W -= 2;
 	else if(x == 0x22)
-		W += 3;
+		W += 2;
 	else if(x == 0xcd)
 		W -= 4;
 	else if(x == 0x33)
@@ -1301,17 +1301,17 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 	else if(x == 0x44)
 		W += 5;
 	else if(x == 0xab)
-		W -= 10;
-	else if (x == 0x55)
-		W += 10;
-	else if(x == 0x9a)
 		W -= 15;
-	else if(x == 0x66)
+	else if (x == 0x55)
 		W += 15;
+	else if(x == 0x9a)
+		W -= 25;
+	else if(x == 0x66)
+		W += 25;
 	else if(x == 0x89)
-		W -= 20;
+		W -= 45;
 	else if(x == 0x77)
-		W += 20;
+		W += 45;
 
 
 		curX = W;
@@ -1321,38 +1321,38 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 			W = curX = 0;
 		_GlobalDate->jos_params.cursor_x = curX;
 		_GlobalDate->jos_params.type = cursor_move;
-		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
+
 
 		switch(y)
 		{
 		case 0xef:
 		case 0x11:
 			tmp.tv_sec = 0;
-			tmp.tv_usec = 80000;
+			tmp.tv_usec = 90000;
 			break;
 
 		case 0xde:
 		case 0x22:
 			tmp.tv_sec = 0;
-			tmp.tv_usec = 50000;
+			tmp.tv_usec = 60000;
 			break;
 
 		case 0xcd:
 		case 0x33:
 			tmp.tv_sec = 0;
-			tmp.tv_usec = 40000;
+			tmp.tv_usec = 50000;
 			break;
 
 		case 0xbc:
 		case 0x44:
 			tmp.tv_sec = 0;
-			tmp.tv_usec = 30000;
+			tmp.tv_usec = 40000;
 			break;
 
 		case 0xab:
 		case 0x55:
 			tmp.tv_sec = 0;
-			tmp.tv_usec = 20000;
+			tmp.tv_usec = 30000;
 			break;
 
 		case 0x9a:
@@ -1364,7 +1364,7 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 		case 0x89:
 		case 0x77:
 			tmp.tv_sec = 0;
-			tmp.tv_usec = 5000;
+			tmp.tv_usec = 10000;
 			break;
 
 		case 0x00:
@@ -1375,33 +1375,33 @@ void CJoystick::HK_JosToMouse(unsigned char x, unsigned char y)
 		static int H = height/2;
 
 		if(y == 0xef)
-			H -= 2;
+			H -= 1;
 		else if(y == 0x11)
-			H += 2;
+			H += 1;
 		else if(y == 0xde)
-			H -= 3;
+			H -= 2;
 		else if(y == 0x22)
-			H += 3;
+			H += 2;
 		else if(y == 0xcd)
 			H -= 4;
 		else if(y == 0x33)
 			H += 4;
 		else if(y == 0xbc)
-			H -= 5;
+			H -= 6;
 		else if( y== 0x44)
-			H += 5;
+			H += 6;
 		else if(y == 0xab)
-			H -= 10;
+			H -= 12;
 		else if(y == 0x55)
-			H += 10;
+			H += 12;
 		else if(y == 0x9a)
-			H -= 15;
+			H -= 20;
 		else if(y == 0x66)
-			H += 15;
+			H += 20;
 		else if(y == 0x89)
-			H -= 18;
+			H -= 30;
 		else if( y == 0x77)
-			H += 18;
+			H += 30;
 
 		curY = H;
 		if(curY > (height - 20))

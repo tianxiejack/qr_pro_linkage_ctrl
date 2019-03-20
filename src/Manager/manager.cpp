@@ -93,14 +93,13 @@ void CManager::classObject_Creat()
 
 void CManager::IPC_Creat()
 {
-    int shm_perm[IPC_MAX];
-    shm_perm[IPC_SHA] = shm_rdonly;
-    shm_perm[IPC_OSD_SHA] = shm_rdwr;
-    shm_perm[IPC_UTCTRK_SHA] = shm_rdwr;
-    shm_perm[IPC_LKOSD_SHA] = shm_rdwr;
-    shm_perm[IPC_OSDTEXT_SHA] = shm_rdwr;
     Ipc_init();
-    Ipc_create(shm_perm);
+    int ret = Ipc_create();
+    if(ret == -1)
+    {
+    	OSA_printf("[%s] ipc creat error \n", __func__);
+    	return;
+    }
 }
 
 void CManager::Platform_Creat()
@@ -1117,6 +1116,7 @@ void CManager::usd_API_WORKMODEWITCH()
 		m_GlobalDate->ImgMtdStat = m_GlobalDate->mtdMode = 0;
 		usd_API_MTDMode();
 		m_GlobalDate->jos_params.workMode = manual_linkage;
+		refreshPtzParam();
 		break;
 	case 0x02:
 		m_GlobalDate->ImgMtdStat = 1;
@@ -1130,6 +1130,7 @@ void CManager::usd_API_WORKMODEWITCH()
 	}
 	m_GlobalDate->jos_params.type = workMode;
 	usd_API_ctrlParams();
+	m_ptz->ptzStop();
 }
 
 void CManager::usd_API_ctrlParams()
@@ -8976,11 +8977,14 @@ void CManager::MSGAPI_ExtInputCtrl_ZoomLong()
 		m_ptz->m_iSetZoomSpeed = -1;
 	else
 		m_ptz->m_iSetZoomSpeed = 0;
-	struct timeval tmp;
-	tmp.tv_sec = 0;
-	tmp.tv_usec = 60000;
-	select(0, NULL, NULL, NULL, &tmp);
-	refreshPtzParam();
+	if(m_GlobalDate->jos_params.workMode == manual_linkage)
+	{
+		struct timeval tmp;
+		tmp.tv_sec = 0;
+		tmp.tv_usec = 60000;
+		select(0, NULL, NULL, NULL, &tmp);
+		refreshPtzParam();
+	}
 }
 
 void CManager::MSGAPI_ExtInputCtrl_ZoomShort()
@@ -8989,11 +8993,14 @@ void CManager::MSGAPI_ExtInputCtrl_ZoomShort()
 		m_ptz->m_iSetZoomSpeed = 1;
 	else
 		m_ptz->m_iSetZoomSpeed = 0;
-	struct timeval tmp;
-	tmp.tv_sec = 0;
-	tmp.tv_usec = 60000;
-	select(0, NULL, NULL, NULL, &tmp);
-	refreshPtzParam();
+	if(m_GlobalDate->jos_params.workMode == manual_linkage)
+	{
+		struct timeval tmp;
+		tmp.tv_sec = 0;
+		tmp.tv_usec = 60000;
+		select(0, NULL, NULL, NULL, &tmp);
+		refreshPtzParam();
+	}
 }
 
 void CManager::MSGAPI_ExtInputCtrl_IrisDown()

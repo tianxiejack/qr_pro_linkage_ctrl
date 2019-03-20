@@ -14,7 +14,7 @@
 #include "app_status.h"
 #include "CMessage.hpp"
 #include "osa_sem.h"
-#include "Ipcctl.h"
+#include "ipc_custom_head.hpp"
 
 using namespace std;
 

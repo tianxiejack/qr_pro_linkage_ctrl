@@ -2,7 +2,7 @@
 #define _IPCPROC_H_
 
 #include "osa_thr.h"
-#include "Ipcctl.h"
+#include "ipc_custom_head.hpp"
 #include  "globalDate.h"
 #include <string>
 #define n_size 32
