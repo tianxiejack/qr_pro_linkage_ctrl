@@ -80,9 +80,18 @@ typedef enum
     josctrl,
     workmode,
     enter_gridmap_view,
+    storeMtdConfig,
+    storeDefaultWorkMode,    
     invalid
 }CMD_ID;
 
+typedef enum
+{
+	default_handleMode,
+	default_autoMode,
+	default_onlyBallMode,
+	default_modecount
+}DefaultWorkMode;
 
 typedef enum 
 {
@@ -119,6 +128,16 @@ typedef enum{
 	cursor_left,
 	cursor_right,
 }josDir;
+
+typedef struct 
+{
+	int targetNum;
+	int trackTime;
+	int maxArea;
+	int minArea;
+	int sensitivity;
+	//std::vector<float> mtdSelectArea;
+}MTD_Config;
 
 typedef struct{
 	int type;
@@ -958,7 +977,7 @@ static void Ipc_init()
 	IpcHandl[IPC_SHA].Class=IPC_Class_SHA;
 	IpcHandl[IPC_SHA].IPCID = 0;
 	IpcHandl[IPC_SHA].length = sizeof(IMGSTATUS);
-	IpcHandl[IPC_SHA].RWmode = shm_rdonly;
+	IpcHandl[IPC_SHA].RWmode = shm_rdwr;
 	IpcHandl[IPC_SHA].ptr = NULL;
 
 	IpcHandl[IPC_OSD_SHA].name = DEFAULTPATH;

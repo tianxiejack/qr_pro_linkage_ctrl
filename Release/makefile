@@ -28,26 +28,26 @@ OS_SUFFIX := $(subst Linux,linux,$(subst Darwin/x86_64,darwin,$(shell uname -s)/
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
-ifneq ($(strip $(CU_DEPS)),)
--include $(CU_DEPS)
+ifneq ($(strip $(CC_DEPS)),)
+-include $(CC_DEPS)
 endif
 ifneq ($(strip $(C++_DEPS)),)
 -include $(C++_DEPS)
 endif
-ifneq ($(strip $(C_DEPS)),)
--include $(C_DEPS)
-endif
-ifneq ($(strip $(CC_DEPS)),)
--include $(CC_DEPS)
-endif
-ifneq ($(strip $(CPP_DEPS)),)
--include $(CPP_DEPS)
+ifneq ($(strip $(C_UPPER_DEPS)),)
+-include $(C_UPPER_DEPS)
 endif
 ifneq ($(strip $(CXX_DEPS)),)
 -include $(CXX_DEPS)
 endif
-ifneq ($(strip $(C_UPPER_DEPS)),)
--include $(C_UPPER_DEPS)
+ifneq ($(strip $(CU_DEPS)),)
+-include $(CU_DEPS)
+endif
+ifneq ($(strip $(CPP_DEPS)),)
+-include $(CPP_DEPS)
+endif
+ifneq ($(strip $(C_DEPS)),)
+-include $(C_DEPS)
 endif
 endif
 
@@ -70,13 +70,13 @@ all: linkage_ctrl
 linkage_ctrl: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: NVCC Linker'
-	/usr/local/cuda-8.0/bin/nvcc --cudart static -L/usr/local/lib/ -L../usr/local/lib/ -Xlinker -rpath=/usr/lib/aarch64-linux-gnu/tegra --relocatable-device-code=false -gencode arch=compute_20,code=compute_20 -gencode arch=compute_53,code=compute_53 -gencode arch=compute_20,code=sm_20 -gencode arch=compute_53,code=sm_53 -m64 -ccbin aarch64-linux-gnu-g++ -link -o  "linkage_ctrl" $(OBJS) $(USER_OBJS) $(LIBS)
+	/usr/local/cuda-8.0/bin/nvcc --cudart static -L/usr/local/lib/ -L../usr/local/lib/ -Xlinker -rpath=/usr/lib/aarch64-linux-gnu/tegra --relocatable-device-code=false -gencode arch=compute_30,code=compute_30 -gencode arch=compute_53,code=compute_53 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_53,code=sm_53 -m64 -ccbin aarch64-linux-gnu-g++ -link -o  "linkage_ctrl" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(CU_DEPS)$(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(CPP_DEPS)$(EXECUTABLES)$(CXX_DEPS)$(C_UPPER_DEPS) linkage_ctrl
+	-$(RM) $(CC_DEPS)$(C++_DEPS)$(EXECUTABLES)$(C_UPPER_DEPS)$(CXX_DEPS)$(OBJS)$(CU_DEPS)$(CPP_DEPS)$(C_DEPS) linkage_ctrl
 	-@echo ' '
 
 .PHONY: all clean dependents

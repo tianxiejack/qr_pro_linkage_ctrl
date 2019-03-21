@@ -87,8 +87,8 @@ public:
 			  	CMD_MMTSELECT fr_img_cmd_mmtsel;
 			  	CMD_TRKDOOR fr_img_cmd_trkdoor;
 			  	CMD_MOUSEPTZ cmd_mouseptz;
-			  	CMD_Mtd_Frame Mtd_Frame;
-			  	CMD_Mtd_Frame* pMtd;
+			  	MTD_Config cmd_mtd_config;
+			  	MTD_Config* pMtd;
 
 
 			    IMGSTATUS *ipc_status;

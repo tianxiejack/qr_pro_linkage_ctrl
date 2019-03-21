@@ -311,12 +311,6 @@ void CPortBase::Preset_Mtd()
 	pM->MSGDRIV_send(MSGID_EXT_INPUT_MtdPreset, 0);
 }
 
-void CPortBase::MtdAreaBox()
-{
-	_globalDate->MtdSetAreaBox = _globalDate->rcvBufQue.at(5);
-	pM->MSGDRIV_send(MSGID_EXT_INPUT_MtdAreaBox, 0);
-}
-
 void CPortBase::OSDSwitch()
 {
 	_globalDate->osdUserSwitch = _globalDate->rcvBufQue.at(5);
@@ -474,7 +468,7 @@ int CPortBase::prcRcvFrameBufQue(int method)
             	Preset_Mtd();
             	break;
             case 0x47:
-            	MtdAreaBox();
+
             	break;
             case 0x48:
             	OSDSwitch();

@@ -55,7 +55,6 @@ public:
     void EnableSavePro();
     void AXISCtrl();
     void Preset_Mtd();
-    void MtdAreaBox();
     void OSDSwitch();
     void callPreset();
     void camera_setPan();

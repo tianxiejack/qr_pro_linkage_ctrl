@@ -40,7 +40,6 @@ public:
     virtual void EnableSavePro(){};
     virtual void AXISCtrl(){};
     virtual void Preset_Mtd(){};
-    virtual void MtdAreaBox(){};
     virtual void OSDSwitch(){};
     virtual void callPreset(){};
     virtual void camera_setPan(){};

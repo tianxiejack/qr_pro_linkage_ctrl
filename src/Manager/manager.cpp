@@ -5,10 +5,11 @@ const char up = 3;
 const char down = 4;
 const int Trk = 1;
 const int Sensor = 2;
-const int profileNum = 1760;
+const int profileNum = 1922;
+const int MtdAreaNum = 10;
 static int  iAxis_X, iAxis_Y, m_valuex, m_valuey;
 static int x_pos, x_speed, y_pos, y_speed;
-extern View viewParam;;
+extern View viewParam;
 string parity[5], dev[5] ;
 
 CManager* sThis = NULL;
@@ -57,6 +58,12 @@ void CManager::creat()
 	int x = 960;
 	int y = 540;
 	m_ipc->IPCBoresightPosCtrl(x, y);
+	struct timeval tmp;
+	tmp.tv_sec = 3;
+	tmp.tv_usec = 0;
+	select(0, NULL, NULL, NULL, &tmp);
+	m_GlobalDate->workMode = m_GlobalDate->default_workMode;
+	usd_API_WORKMODEWITCH();
 }
 
 void CManager::Message_Creat()
@@ -206,7 +213,6 @@ void CManager::MSGAPI_Init()
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_configWrite_Save, MSGAPI_ExtInpuCtrl_configWrite_Save, 0);
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_MTDCTRL, MSGAPI_ExtInpuCtrl_MTDCTRL, 0);
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_MTDMode, MSGAPI_ExtInpuCtrl_MTDMode, 0);
-	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_MtdAreaBox, MSGAPI_ExtInpuCtrl_MtdAreaBox, 0);
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_MtdPreset, MSGAPI_EXT_INPUT_MtdPreset, 0);
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_CallPreset, MSGAPI_EXT_INPUT_CallPreset, 0);
 	m_Message->MSGDRIV_register(MSGID_EXT_INPUT_setPan, MSGAPI_EXT_INPUT_setPan, 0);
@@ -243,6 +249,8 @@ void CManager::MSGAPI_Init()
 	m_Message->MSGDRIV_register(MSGID_IPC_INPUT_PosAndZoom, MSGAPI_IPC_INPUT_PosAndZoom, 0);
 	m_Message->MSGDRIV_register(MSGID_IPC_INPUT_NameAndPos, MSGAPI_IPC_INPUT_VideoNameAndPos, 0);
 	m_Message->MSGDRIV_register(MSGID_IPC_INPUT_CTRLPARAMS, MSGAPI_IPC_INPUT_CTRLPARAMS, 0);
+	m_Message->MSGDRIV_register(MSGID_IPC_INPUT_defaultWorkMode, MSGAPI_IPC_INPUT_defaultWorkMode, 0);
+	m_Message->MSGDRIV_register(MSGID_IPC_INPUT_MtdParams, MSGAPI_IPC_INPUT_MtdParams, 0);
 
 }
 
@@ -413,13 +421,6 @@ void CManager::MSGAPI_ExtInpuCtrl_MTDCTRL(long p)
 void CManager::MSGAPI_ExtInpuCtrl_MTDMode(long p)
 {
 	pThis->usd_API_MTDMode();
-}
-
-void CManager::MSGAPI_ExtInpuCtrl_MtdAreaBox(long p)
-{
-	pThis->m_ipc->pMtd = &(pThis->m_ipc->Mtd_Frame);
-	pThis->m_ipc->pMtd->areaSetBox = m_GlobalDate->MtdSetAreaBox;
-	pThis->m_ipc->IPCSendMtdFrame();
 }
 
 void CManager::MSGAPI_IPC_INPUT_TRACKCTRL(long p)
@@ -623,6 +624,22 @@ void CManager::MSGAPI_IPC_INPUT_fontSize(long p)
 void CManager::MSGAPI_IPC_INPUT_CTRLPARAMS(long p)
 {
 	pThis->usd_API_ctrlParams();
+}
+
+void CManager::MSGAPI_IPC_INPUT_defaultWorkMode(long p)
+{
+	pThis->modifierAVTProfile(121, 0, m_GlobalDate->default_workMode, NULL);
+	pThis->updataProfile();
+}
+
+void CManager::MSGAPI_IPC_INPUT_MtdParams(long p)
+{
+	pThis->cfg_value[848] = pThis->m_ipc->pMtd->targetNum;
+	pThis->cfg_value[849] = pThis->m_ipc->pMtd->trackTime;
+	pThis->cfg_value[850] = pThis->m_ipc->pMtd->maxArea;
+	pThis->cfg_value[851] = pThis->m_ipc->pMtd->minArea;
+	pThis->cfg_value[852] = pThis->m_ipc->pMtd->sensitivity;
+	pThis->updataProfile();
 }
 
 void CManager::usd_API_AXIS()
@@ -1765,7 +1782,6 @@ void CManager::ExtInputCtrl_AcqBoxPos()
 			{
 				m_GlobalDate->m_acqBox_Pos.BoresightPos_x = 960;
 				m_GlobalDate->m_acqBox_Pos.BoresightPos_y = 540;
-				printf("00000000000000000000\n ");
 			}
 			else if(video_pal == sensor)
 			{
@@ -1782,8 +1798,6 @@ void CManager::ExtInputCtrl_AcqBoxPos()
 		m_ipc->ipcAcqBoxCtrl(&m_GlobalDate->m_acqBox_Pos);
 
 }
-
-
 
 void CManager::ExtInputCtrl_AXIS()
 {
@@ -1848,6 +1862,62 @@ void CManager::ExtInputCtrl_SendSeaTrkPos(int sensor)
 	 }
 }
 
+int CManager::readMtdDetectArea()
+{
+	string MtdArea;
+	int configId_Max = MtdAreaNum;
+	char  detectArea[30] = "detectArea_";
+	MtdArea = "MtdDetectArea.yml";
+	FILE *fp = fopen(MtdArea.c_str(), "rt");
+
+	if(fp != NULL){
+		fseek(fp, 0, SEEK_END);
+		int len = ftell(fp);
+		fclose(fp);
+		if(len < 10)
+			return  -1;
+		else{
+			FileStorage fr(MtdArea, FileStorage::READ);
+			if(fr.isOpened()){
+				for(int i=0; i<configId_Max; i++){
+					sprintf(detectArea, "detectArea_%d", i);
+					DetectArea_value[i] = (float)fr[detectArea];
+					printf("DetectArea_value[%d] = %f \n", i, DetectArea_value[i]);
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+
+int CManager::setMtdDetectArea()
+{
+	string MtdArea;
+	int configId_Max = MtdAreaNum;
+	char  detectArea[30] = "detectArea_";
+	MtdArea = "MtdDetectArea.yml";
+	FILE *fp = fopen(MtdArea.c_str(), "rt");
+
+	if(fp != NULL){
+		fseek(fp, 0, SEEK_END);
+		int len = ftell(fp);
+		fclose(fp);
+		if(len < 10)
+			return  -1;
+		else{
+			FileStorage fr(MtdArea, FileStorage::WRITE);
+			if(fr.isOpened()){
+				for(int i=0; i<configId_Max; i++){
+					sprintf(detectArea, "detectArea_%d", i);
+					fr << detectArea << DetectArea_value[i];
+
+				}
+			}
+		}
+	}
+	return 0;
+}
 
 int  CManager::configAvtFromFile()
 {
@@ -1855,6 +1925,7 @@ int  CManager::configAvtFromFile()
 	m_ipc->ipc_UTC = m_ipc->getUTCSharedMem();
 	m_ipc->ipc_OSDTEXT = m_ipc->getOSDTEXTSharedMem();
 	m_ipc->ipc_status = m_ipc->getAvtStatSharedMem();
+	m_ipc->pMtd = &(m_ipc->cmd_mtd_config);
 
 	string cfgAvtFile;
 	int configId_Max = profileNum;
@@ -1875,6 +1946,10 @@ int  CManager::configAvtFromFile()
 					sprintf(cfg_avt, "cfg_avt_%d", i);
 					cfg_value[i] = (float)fr[cfg_avt];
 					//printf(" read cfg [%d] %f \n", i, cfg_value[i]);
+				}
+
+				{
+					m_GlobalDate->default_workMode = (int)fr["cfg_avt_1920"];
 				}
 
 				{//jos
@@ -3543,25 +3618,12 @@ int  CManager::configAvtFromFile()
 
 				{
 					//Mtd
-					m_ipc->pMtd = &(m_ipc->Mtd_Frame);
+					m_ipc->pMtd->targetNum = (int)fr["cfg_avt_848"];
+					m_ipc->pMtd->trackTime = (int)fr["cfg_avt_849"];
+					m_ipc->pMtd->maxArea = (int)fr["cfg_avt_850"];
+					m_ipc->pMtd->minArea = (int)fr["cfg_avt_851"];
+					m_ipc->pMtd->sensitivity = (int)fr["cfg_avt_852"];
 
-					m_ipc->pMtd->areaSetBox = (int)fr["cfg_avt_848"];
-					m_ipc->pMtd->detectNum = (int)fr["cfg_avt_849"];
-					m_ipc->pMtd->tmpUpdateSpeed = (int)fr["cfg_avt_850"];
-					m_ipc->pMtd->tmpMaxPixel = (int)fr["cfg_avt_851"];
-					m_ipc->pMtd->tmpMinPixel = (int)fr["cfg_avt_852"];
-					m_ipc->pMtd->sensitivityThreshold = (int)fr["cfg_avt_853"];
-					m_ipc->pMtd->detectSpeed = (int)fr["cfg_avt_854"];
-					int value =  (int)fr["cfg_avt_855"];
-					m_GlobalDate->mtdconfig.trktime = value * 1000;
-					m_GlobalDate->mtdconfig.warning = (int)fr["cfg_avt_856"];
-					m_GlobalDate->mtdconfig.high_low_level = (int)fr["cfg_avt_857"];
-					m_ipc->pMtd->detectArea_X = (int)fr["cfg_avt_858"];
-					m_ipc->pMtd->detectArea_Y = (int)fr["cfg_avt_859"];
-					m_ipc->pMtd->detectArea_wide = (int)fr["cfg_avt_860"];
-					m_ipc->pMtd->detectArea_high = (int)fr["cfg_avt_861"];
-					m_ipc->pMtd->priority = (int)fr["cfg_avt_862"];
-					m_ipc->pMtd->alarm_delay = (int)fr["cfg_avt_863"];
 				}
 
 
@@ -3616,8 +3678,6 @@ void CManager::modifierAVTProfile(int block, int field, float value,char *inBuf)
 
 	OSD_text* wOSD;
 	wOSD = &m_OSD;
-
-	m_ipc->pMtd = &(m_ipc->Mtd_Frame);
 
 	const char* str = "reboot";
 	int check = ((block -1) * 16 + field);
@@ -5518,33 +5578,6 @@ printf("modifer============>check = %d  value = %f\n", check, value);
 		    system(str);
 			break;
 
-		case 848:
-			m_ipc->pMtd->areaSetBox = (int)value;
-			break;
-		case 849:
-			m_ipc->pMtd->detectNum = (int)value;
-			break;
-
-		case 850:
-			m_ipc->pMtd->tmpUpdateSpeed = (int)value;
-			break;
-
-		case 851:
-			m_ipc->pMtd->tmpMaxPixel = (int)value;
-			break;
-
-		case 852:
-			m_ipc->pMtd->tmpMinPixel = (int)value;
-			break;
-
-		case 853:
-			m_ipc->pMtd->sensitivityThreshold = (int)value;
-			break;
-
-		case 854:
-			m_ipc->pMtd->detectSpeed = (int)value;
-			break;
-
 		case 855:
 			m_GlobalDate->mtdconfig.trktime = (int)value * 1000;
 			break;
@@ -5555,30 +5588,6 @@ printf("modifer============>check = %d  value = %f\n", check, value);
 
 		case 857:
 			m_GlobalDate->mtdconfig.high_low_level = (int)value;
-			break;
-
-		case 858:
-			m_ipc->pMtd->detectArea_X = (int)value;
-			break;
-
-		case 859:
-			m_ipc->pMtd->detectArea_Y = (int)value;
-			break;
-
-		case 860:
-			m_ipc->pMtd->detectArea_wide = (int)value;
-			break;
-
-		case 861:
-			m_ipc->pMtd->detectArea_high = (int)value;
-			break;
-
-		case 862:
-			m_ipc->pMtd->priority = (int)value;
-			break;
-
-		case 863:
-			m_ipc->pMtd->alarm_delay = (int)value;
 			break;
 
 		case 864:
@@ -5600,8 +5609,6 @@ printf("modifer============>check = %d  value = %f\n", check, value);
 		m_ipc->IpcConfigUTC();
 	else if(check == 40)
 		m_ipc->IpcSendLosttime();
-	else if(check >= 848 && check <= 863)
-		m_ipc->IPCSendMtdFrame();
 
 	int x = pObj->params.sensorParams[1].defaultBoresightPos_x;
 	int y = pObj->params.sensorParams[1].defaultBoresightPos_y;
@@ -6255,7 +6262,6 @@ int CManager::answerRead(int block, int field)
 {
 	m_ipc->ipc_OSD = m_ipc->getOSDSharedMem();
 	m_ipc->ipc_UTC = m_ipc->getUTCSharedMem();
-	m_ipc->pMtd = &(m_ipc->Mtd_Frame);
 
 	PLATFORMCTRL_Interface* pcfg;
 	pcfg = m_plt;
@@ -8761,27 +8767,6 @@ int CManager::answerRead(int block, int field)
 			value = m_ptzSpeed.SpeedLeveTilt[9];
 			break;
 
-		case 848:
-			value = m_ipc->pMtd->areaSetBox;
-			break;
-		case 849:
-			value=m_ipc->pMtd->detectNum ;
-				break;
-		case 850:
-			 value=m_ipc->pMtd->tmpUpdateSpeed ;
-				break;
-		case 851:
-			value=m_ipc->pMtd->tmpMaxPixel ;
-				break;
-		case 852:
-			value=m_ipc->pMtd->tmpMinPixel;
-				break;
-		case 853:
-			value=m_ipc->pMtd->sensitivityThreshold ;
-				break;
-		case 854:
-			value=m_ipc->pMtd->detectSpeed ;
-				break;
 		case 855:
 			 value=m_GlobalDate->mtdconfig.trktime * 1000;
 				break;
@@ -8790,24 +8775,6 @@ int CManager::answerRead(int block, int field)
 				break;
 		case 857:
 			value=m_GlobalDate->mtdconfig.high_low_level ;
-				break;
-		case 858:
-			value=m_ipc->pMtd->detectArea_X ;
-				break;
-		case 859:
-			value=m_ipc->pMtd->detectArea_Y ;
-				break;
-		case 860:
-			value=	m_ipc->pMtd->detectArea_wide;
-				break;
-		case 861:
-				value=	m_ipc->pMtd->detectArea_high ;
-				break;
-		case 862:
-				value=	m_ipc->pMtd->priority ;
-				break;
-		case 863:
-				value=	m_ipc->pMtd->alarm_delay;
 				break;
 
 		case 864:

@@ -55,6 +55,7 @@ private:
 private:
 	//float* cfg_value;
 	vector <float> cfg_value;
+	vector <float> DetectArea_value;
 	HPLTCTRL  m_plt;
 	PLATFORMCTRL_TrackerInput m_pltInput;
 	PLATFORMCTRL_Output m_pltOutput;
@@ -87,6 +88,8 @@ private:
 	void Sem_destroy();
 	int GetIpcAddress(int type);
 	int configAvtFromFile();
+	int readMtdDetectArea();
+	int setMtdDetectArea();
 	void Enableresolution(CMD_IPCRESOLUTION resolu);
 	void Ipc_resolution();
 	void modifierAVTProfile(int block, int field, float value,char *inBuf);
@@ -96,6 +99,7 @@ private:
 	int answerRead(int block, int field);
 	void init_sigaction();
 	void init_time();
+
 
 private:
 	static void MSGAPI_ExtInpuCtrl_AXIS(long p);
@@ -117,7 +121,6 @@ private:
 	static void MSGAPI_ExtInpuCtrl_configWrite_Save(long p);
 	static void MSGAPI_ExtInpuCtrl_MTDCTRL(long p);
 	static void MSGAPI_ExtInpuCtrl_MTDMode(long p);
-	static void MSGAPI_ExtInpuCtrl_MtdAreaBox(long p);
 	static void MSGAPI_EXT_INPUT_MtdPreset(long p);
 	static void MSGAPI_EXT_INPUT_CallPreset(long p);
 	static void MSGAPI_EXT_INPUT_setPan(long p);
@@ -153,6 +156,8 @@ private:
 	static void MSGAPI_IPC_INPUT_PosAndZoom(long p);
 	static void MSGAPI_IPC_INPUT_VideoNameAndPos(long p);
 	static void MSGAPI_IPC_INPUT_CTRLPARAMS(long p);
+	static void MSGAPI_IPC_INPUT_defaultWorkMode(long p);
+	static void MSGAPI_IPC_INPUT_MtdParams(long p);
 	static void MSGAPI_IPC_INPUT_fontSize(long p);
 
 	void usd_API_AXIS();

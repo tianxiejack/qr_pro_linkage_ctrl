@@ -155,14 +155,6 @@ void CIPCProc::getIPCMsgProc()
      			printf("trktime  =  %d \n", _GlobalDate->mtdconfig.trktime);
      		break;
 
-     		case sceneTrk:  /*场景跟踪*/
-     			memcpy(&trackstatus, &fr_img_test.param[0], 4);
-     			memcpy(&trackposx, &fr_img_test.param[4], 4);
-     			memcpy(&trackposy, &fr_img_test.param[8], 4);
-     			_Message->MSGDRIV_send(MSGID_IPC_INPUT_TRACKCTRL, 0);
-     		//	printf("IPC  ==>  trackposx = %f,   trackposy = %f,     trackstatus  = %d \n", trackposx, trackposy, trackstatus);
-     			break;
-
      		case querypos:				/*Send Pos to img */
      			_Message->MSGDRIV_send(MSGID_IPC_QueryPos, 0);
      			break;
@@ -213,6 +205,17 @@ void CIPCProc::getIPCMsgProc()
 
  		case enter_gridmap_view:
  			_GlobalDate->gridMap = fr_img_test.param[0];
+ 			break;
+
+ 		case storeMtdConfig:
+ 			pMtd = &cmd_mtd_config;
+ 			memcpy(pMtd, fr_img_test.param, sizeof(cmd_mtd_config));
+ 			_Message->MSGDRIV_send(MSGID_IPC_INPUT_MtdParams, 0);
+ 			break;
+
+ 		case storeDefaultWorkMode:
+ 			_GlobalDate->default_workMode = fr_img_test.param[0];
+ 			_Message->MSGDRIV_send(MSGID_IPC_INPUT_defaultWorkMode, 0);
  			break;
 
 	    default:
@@ -450,9 +453,9 @@ int CIPCProc::IPCSendMtdFrame()
 {
 	memset(test.param, 0, PARAMLEN);
 	test.cmd_ID = mtdFrame;
-	pMtd = &Mtd_Frame;
-	memcpy(&test.param, pMtd, sizeof(Mtd_Frame));
+	memcpy(&test.param, pMtd, sizeof(cmd_mtd_config));
 	ipc_sendmsg(&test, IPC_TOIMG_MSG);
+	return 0;
 }
 
 int CIPCProc::IPCSendPos(int pan, int tilt, int zoom)

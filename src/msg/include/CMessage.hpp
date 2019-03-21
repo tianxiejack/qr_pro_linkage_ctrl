@@ -47,7 +47,6 @@ typedef enum _sys_msg_id_ {
     MSGID_EXT_INPUT_workModeSwitch,
     MSGID_EXT_INPUT_captureSwitch,
     MSGID_EXT_INPUT_sceneTrk,
-    MSGID_EXT_INPUT_MtdAreaBox,
     MSGID_EXT_INPUT_CallPreset,
     MSGID_EXT_INPUT_setPan,
     MSGID_EXT_INPUT_setTilt,
@@ -99,6 +98,8 @@ typedef enum _sys_msg_id_ {
     MSGID_IPC_INPUT_reset_swtarget_timer,
     MSGID_IPC_INPUT_ballparam,
     MSGID_IPC_INPUT_CTRLPARAMS,
+    MSGID_IPC_INPUT_defaultWorkMode,
+    MSGID_IPC_INPUT_MtdParams,
     MAX_MSG_NUM
 }eSysMsgId, MSG_PROC_ID;
 

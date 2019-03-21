@@ -255,6 +255,7 @@ int sync_pos;
 unsigned short rcv_zoomValue;
 int jos_ctrl;
 int host_ctrl;
+int default_workMode;
 int workMode;
 int outputMode;
 int chid_camera;
