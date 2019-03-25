@@ -250,7 +250,6 @@ unsigned short Mtd_Moitor_Y;
 bool MtdAutoLoop;
 int ThreeMode_bak;
 int Sync_Query;
-int sync_fovComp;
 int sync_pos;
 unsigned short rcv_zoomValue;
 int jos_ctrl;
