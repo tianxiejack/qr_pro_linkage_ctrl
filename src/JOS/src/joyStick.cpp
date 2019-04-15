@@ -861,7 +861,6 @@ void CJoystick::HK_procJosEvent_Axis(unsigned char*  josNum)
 void CJoystick::HK_procMouse_Axis(unsigned char*  MouseNum)
 {
 	/***********/
-
 	static int zoom = 0;
 	if(MouseNum[usb_Z] == 0)
 	{

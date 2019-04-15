@@ -218,6 +218,12 @@ void CIPCProc::getIPCMsgProc()
  			_Message->MSGDRIV_send(MSGID_IPC_INPUT_defaultWorkMode, 0);
  			break;
 
+ 		case jos_mouse_mode:
+ 			_GlobalDate->jos_params.ctrlMode = fr_img_test.param[0];/*jos:1 控球模式；mouse:2 鼠标模式*/
+ 			_GlobalDate->jos_params.workMode = ballctrl;
+ 			_Message->MSGDRIV_send(MSGID_EXT_INPUT_workModeSwitch, 0);
+ 			break;
+
 	    default:
 	        break;
         }

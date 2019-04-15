@@ -124,11 +124,6 @@ typedef enum{
 }jos_Mode;
 
 typedef enum{
-	jos_mode = 1,
-	mouse_mode
-}jos_mouse_Mode;
-
-typedef enum{
 	cursor_up = 1,
 	cursor_down,
 	cursor_left,
@@ -550,11 +545,6 @@ typedef struct{
 	unsigned int AimW;
 	unsigned int AimH;
 }AcqBoxWH;
-
-typedef struct{
-	volatile int mode; //jos_mode:控球模式   mouse_mode:鼠标模式
-}JOS_MOUSE_MODE;
-
 
 /** universal status **/
 typedef struct
