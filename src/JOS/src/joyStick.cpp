@@ -941,33 +941,35 @@ void CJoystick::HK_ProcJosEvent_Button(unsigned char*  josNum)
 		break;
 
 	case 0x10:
-		_GlobalDate->workMode = (_GlobalDate->workMode + 1)%3;
-
-		switch(_GlobalDate->workMode)
+		if(_GlobalDate->calibration)
 		{
-		case 0:
-			_GlobalDate->workMode = manual_linkage;
-			_GlobalDate->jos_params.ctrlMode = mouse;
-			break;
-		case 1:
-			_GlobalDate->workMode = Auto_linkage;
-			_GlobalDate->jos_params.ctrlMode = jos;
-			break;
-		case 2:
-			_GlobalDate->workMode = ballctrl;
-			if(_GlobalDate->jos_params.menu == true)
+			_GlobalDate->workMode = (_GlobalDate->workMode + 1)%3;
+
+			switch(_GlobalDate->workMode)
+			{
+			case 0:
+				_GlobalDate->workMode = manual_linkage;
 				_GlobalDate->jos_params.ctrlMode = mouse;
-			else
+				break;
+			case 1:
+				_GlobalDate->workMode = Auto_linkage;
 				_GlobalDate->jos_params.ctrlMode = jos;
-			break;
+				break;
+			case 2:
+				_GlobalDate->workMode = ballctrl;
+				if(_GlobalDate->jos_params.menu == true)
+					_GlobalDate->jos_params.ctrlMode = mouse;
+				else
+					_GlobalDate->jos_params.ctrlMode = jos;
+				break;
+			}
+			josSendMsg(MSGID_EXT_INPUT_workModeSwitch);
+
+			struct timeval tmp;
+			tmp.tv_sec = 0;
+			tmp.tv_usec = 500000;
+			select(0, NULL, NULL, NULL, &tmp);
 		}
-		josSendMsg(MSGID_EXT_INPUT_workModeSwitch);
-
-		struct timeval tmp;
-		tmp.tv_sec = 0;
-		tmp.tv_usec = 500000;
-		select(0, NULL, NULL, NULL, &tmp);
-
 		_GlobalDate->jos_params.type = ctrlMode;
 		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 		break;
