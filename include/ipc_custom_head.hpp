@@ -81,7 +81,8 @@ typedef enum
     workmode,
     enter_gridmap_view,
     storeMtdConfig,
-    storeDefaultWorkMode,    
+    storeDefaultWorkMode,
+    jos_mouse_mode,
     invalid
 }CMD_ID;
 
@@ -121,6 +122,11 @@ typedef enum{
 	jos = 1,
 	mouse
 }jos_Mode;
+
+typedef enum{
+	jos_mode = 1,
+	mouse_mode
+}jos_mouse_Mode;
 
 typedef enum{
 	cursor_up = 1,
@@ -545,6 +551,9 @@ typedef struct{
 	unsigned int AimH;
 }AcqBoxWH;
 
+typedef struct{
+	volatile int mode; //jos_mode:控球模式   mouse_mode:鼠标模式
+}JOS_MOUSE_MODE;
 
 
 /** universal status **/
