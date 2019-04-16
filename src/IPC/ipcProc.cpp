@@ -221,9 +221,15 @@ void CIPCProc::getIPCMsgProc()
  		case jos_mouse_mode:
  			_GlobalDate->jos_params.ctrlMode = fr_img_test.param[0];/*jos:1 控球模式；mouse:2 鼠标模式*/
  			if(_GlobalDate->jos_params.ctrlMode == 3)
+ 			{
  				_GlobalDate->calibration = 0;
+ 				_GlobalDate->jos_params.menu = true; /*exit calibration close menu*/
+ 			}
  			else
+ 			{
  				_GlobalDate->calibration = 1;
+ 				_GlobalDate->jos_params.menu = false;/*open calibration open menu*/
+ 			}
  			break;
 
 	    default:
