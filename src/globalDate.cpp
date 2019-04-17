@@ -29,6 +29,7 @@ CGlobalDate::CGlobalDate():EXT_Ctrl(Cmd_Mesg_Max), Host_Ctrl(40), commode(2), fe
 	memset(&mainProStat, 0, sizeof(mainProStat));
 	mtdconfig.preset = 1;
 	default_workMode = default_handleMode;
+	calibration = 1;
 }
 
 CGlobalDate* CGlobalDate::Instance()
