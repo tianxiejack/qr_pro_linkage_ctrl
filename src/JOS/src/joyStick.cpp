@@ -13,6 +13,82 @@ bool CJoystick::JosStart = true;
 bool CJoystick::HKJosStart = true;
 unsigned char jos_date[64] = {};
 
+
+int controlBallComfortable(int zoom , int speed )
+{
+	int ret = speed;
+	if( speed != 0)
+	{
+		if(zoom > 55000)
+		{
+			if(speed > 0)
+			{
+				if(speed <=25)
+					ret = 1;
+				else if(speed > 25 && speed < 45)
+					ret = 2;
+				else if(speed > 45)
+					ret = 3;
+			}
+			else
+			{
+				if(speed >= -25)
+					ret = -1;
+				else if(speed < -25 && speed > -45)
+					ret = -2;
+				if(speed < -45)
+					ret = -3;
+			}
+		}
+		else if(zoom > 40000)
+		{
+			if(speed > 0)
+			{
+				if(speed <=25)
+					ret = 1;
+				else if(speed > 25 && speed < 45)
+					ret = 3;
+				else if(speed > 45)
+					ret = 4;
+			}
+			else
+			{
+				if(speed >= -25)
+					ret = -1;
+				else if(speed < -25 && speed > -45)
+					ret = -3;
+				if(speed < -45)
+					ret = -4;
+			}
+		}
+		else if(zoom > 28000)
+		{
+			if(speed > 0)
+			{
+				if(speed <=25)
+					ret = 1;
+				else if(speed > 25 && speed < 45)
+					ret = 3;
+				else if(speed > 45)
+					ret = 5;
+			}
+			else
+			{
+				if(speed >= -25)
+					ret = -1;
+				else if(speed < -25 && speed > -45)
+					ret = -3;
+				if(speed < -45)
+					ret = -5;
+			}
+		}
+	}
+	else
+		ret = 0;
+
+	return ret;
+}
+
 CJoystick::CJoystick()
 {
 	jse = NULL;
@@ -1154,6 +1230,8 @@ void CJoystick::HK_JosToSpeedX(int X)
 		speed = 0;
 		break;
 	}
+	speed = controlBallComfortable(_GlobalDate->rcv_zoomValue , speed );
+
 	_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AXISX) = speed;
 	josSendMsg(MSGID_EXT_INPUT_PLATCTRL);
 
@@ -1224,6 +1302,8 @@ void CJoystick::HK_JosToSpeedY(int Y)
 		speed = 0;
 		break;
 	}
+	speed = controlBallComfortable(_GlobalDate->rcv_zoomValue , speed );
+
 	_GlobalDate->EXT_Ctrl.at(Cmd_Mesg_AXISY) = speed;
 	josSendMsg(MSGID_EXT_INPUT_PLATCTRL);
 }
@@ -1426,3 +1506,4 @@ void CJoystick::HK_JosMap()
 			HK_JosToMouse(jos_date[usb_X], jos_date[usb_Y]);
 	}
 }
+
