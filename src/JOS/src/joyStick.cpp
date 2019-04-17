@@ -1045,9 +1045,8 @@ void CJoystick::HK_ProcJosEvent_Button(unsigned char*  josNum)
 			tmp.tv_sec = 0;
 			tmp.tv_usec = 500000;
 			select(0, NULL, NULL, NULL, &tmp);
-
-			_GlobalDate->jos_params.type = ctrlMode;
 		}
+		_GlobalDate->jos_params.type = ctrlMode;
 		josSendMsg(MSGID_IPC_INPUT_CTRLPARAMS);
 		break;
 
