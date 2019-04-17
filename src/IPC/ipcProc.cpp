@@ -224,6 +224,15 @@ void CIPCProc::getIPCMsgProc()
  			{
  				_GlobalDate->calibration = 1;
  				_GlobalDate->jos_params.menu = true; /*exit calibration close menu*/
+ 				if(_GlobalDate->workMode == manual_linkage)
+ 					_GlobalDate->jos_params.ctrlMode = mouse;
+ 				if( _GlobalDate->workMode == ballctrl)
+ 				{
+ 					if(_GlobalDate->jos_params.menu == true)
+ 						_GlobalDate->jos_params.ctrlMode = mouse;
+ 					else
+ 						_GlobalDate->jos_params.ctrlMode = jos;
+ 				}
  			}
  			else
  			{
