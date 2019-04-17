@@ -230,15 +230,16 @@ private:
 			OSA_semWait(&m_GlobalDate->m_semHndl_automtd, OSA_TIMEOUT_FOREVER);
 			if(flag)
 			{
-				dtimer.startTimer(swtarget_id, m_GlobalDate->mtdconfig.trktime);
+				sThis->dtimer.startTimer(sThis->swtarget_id, m_GlobalDate->mtdconfig.trktime);
 				flag = false;
 			}
 			if(m_GlobalDate->MtdAutoLoop)
 			{
 				int pan = m_GlobalDate->linkagePos.panPos;
 				int Tilt = m_GlobalDate->linkagePos.tilPos;
+				int zoom = m_GlobalDate->linkagePos.zoom;
 				sThis->m_ptz->ptzSetSpeed(pan, Tilt);
-				//sThis->m_ptz->ptzSetPos(pan, Tilt);
+				sThis->m_ptz->setZoomPos(zoom);
 			}
 		}
 
