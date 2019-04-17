@@ -240,7 +240,6 @@ void CManager::MSGAPI_Init()
 	m_Message->MSGDRIV_register(MSGID_IPC_AutoMtd, MSGAPI_IPC_AutoMtd, 0);
 	m_Message->MSGDRIV_register(MSGID_IPC_Mtdoutput, MSGAPI_IPC_Mtdoutput, 0);
 	m_Message->MSGDRIV_register(MSGID_IPC_Mtdpolar, MSGAPI_IPC_Mtdpolar, 0);
-	m_Message->MSGDRIV_register(MSGID_IPC_INPUT_reset_swtarget_timer, MSGAPI_IPC_INPUT_reset_swtarget_timer, 0);
 	m_Message->MSGDRIV_register(MSGID_IPC_INPUT_ballparam, MSGAPI_IPC_ballparam, 0);
 	m_Message->MSGDRIV_register(MSGID_IPC_UserOSD, MSGAPI_IPC_UserOSDSWITCH, 0);
 
@@ -493,11 +492,6 @@ void CManager::MSGAPI_IPC_Mtdpolar(long p)
 {
 	pThis->SwitchWarning(386, m_GlobalDate->mtdconfig.high_low_level);
 	printf(" [GPIO] 386 polar is %d \n", m_GlobalDate->mtdconfig.high_low_level);
-}
-
-void CManager::MSGAPI_IPC_INPUT_reset_swtarget_timer(long p)
-{
-	pThis->dtimer.resetTimer(pThis->swtarget_id,m_GlobalDate->mtdconfig.trktime);
 }
 
 void CManager::MSGAPI_IPC_ballparam(long p)
@@ -1608,7 +1602,6 @@ void CManager::usd_API_MTDMode()
 		if(exitSpeedLoop_Linkage)
 			thrCreate_LinkageSpeedLoop();
 		m_GlobalDate->MtdAutoLoop = true;
-		dtimer.startTimer(swtarget_id, m_GlobalDate->mtdconfig.trktime);
 		//printf("start time  = %d \n", m_GlobalDate->mtdconfig.trktime);
 			}
 

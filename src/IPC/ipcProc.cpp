@@ -178,10 +178,6 @@ void CIPCProc::getIPCMsgProc()
      			_GlobalDate->Host_Ctrl[wordSize] = fr_img_test.param[0];
      			_Message->MSGDRIV_send(MSGID_EXT_INPUT_fontsize, 0);
      			break;
-    		case reset_swtarget_timer:
-    			if(1 == _GlobalDate->mtdMode)
-    				_Message->MSGDRIV_send(MSGID_IPC_INPUT_reset_swtarget_timer, 0);
-    			break;
      		case mtdmode:
      			if(_GlobalDate->ImgMtdStat)
      				_GlobalDate->mtdMode = fr_img_test.param[0];
