@@ -151,8 +151,9 @@ void CIPCProc::getIPCMsgProc()
      			_Message->MSGDRIV_send(MSGID_IPC_Mtdpolar, 0);
      		break;
      		case mtdtrktime:			/*49:针对移动检测，跟踪的持续时间*/
-     			_GlobalDate->mtdconfig.trktime = fr_img_test.param[0] * 1000;
-     			printf("trktime  =  %d \n", _GlobalDate->mtdconfig.trktime);
+     			_GlobalDate->mtdconfig.trktime = fr_img_test.param[0]*1000;
+     			if(1 == _GlobalDate->mtdMode)
+     				_Message->MSGDRIV_send(MSGID_IPC_INPUT_reset_swtarget_timer, 0);
      		break;
 
      		case querypos:				/*Send Pos to img */

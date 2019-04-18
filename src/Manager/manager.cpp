@@ -229,6 +229,7 @@ void CManager::MSGAPI_Init()
 	m_Message->MSGDRIV_register(test_ptz_right, test_right, 0);
 	m_Message->MSGDRIV_register(test_ptz_stop, test_stop, 0);
 
+	m_Message->MSGDRIV_register(MSGID_IPC_INPUT_reset_swtarget_timer, MSGAPI_IPC_INPUT_reset_swtarget_timer, 0);
 	m_Message->MSGDRIV_register(MSGID_IPC_INPUT_TRACKCTRL, MSGAPI_IPC_INPUT_TRACKCTRL, 0);
 	m_Message->MSGDRIV_register(MSGID_IPC_chooseVideoChannel, MSGAPI_IPC_ChooseVideoChannel, 0);
 	m_Message->MSGDRIV_register(MSGID_IPC_Resolution, MSGAPI_IPC_Resolution, 0);
@@ -505,6 +506,11 @@ void CManager::MSGAPI_IPC_UserOSDSWITCH(long p)
 	pThis->m_ipc->IpcConfigOSD();
 }
 
+void CManager::MSGAPI_IPC_INPUT_reset_swtarget_timer(long p)
+{
+	pThis->dtimer.resetTimer(pThis->swtarget_id,m_GlobalDate->mtdconfig.trktime);
+}
+
 void CManager::MSGAPI_EXT_INPUT_MtdPreset(long p)
 {
 	pThis->preset_Mtd();
@@ -629,7 +635,7 @@ void CManager::MSGAPI_IPC_INPUT_defaultWorkMode(long p)
 void CManager::MSGAPI_IPC_INPUT_MtdParams(long p)
 {
 	pThis->cfg_value[848] = pThis->m_ipc->pMtd->targetNum;
-	pThis->cfg_value[849] = pThis->m_ipc->pMtd->trackTime;
+	pThis->cfg_value[855] = pThis->m_ipc->pMtd->trackTime;
 	pThis->cfg_value[850] = pThis->m_ipc->pMtd->maxArea;
 	pThis->cfg_value[851] = pThis->m_ipc->pMtd->minArea;
 	pThis->cfg_value[852] = pThis->m_ipc->pMtd->sensitivity;
@@ -1583,6 +1589,7 @@ void CManager::usd_API_MTDMode()
 			}
 			pThis->dtimer.stopTimer(pThis->swtarget_id);
 			m_GlobalDate->MtdAutoLoop = false;
+			AutoTimer = true;
 		}
 		else
 		{
@@ -1602,7 +1609,6 @@ void CManager::usd_API_MTDMode()
 		if(exitSpeedLoop_Linkage)
 			thrCreate_LinkageSpeedLoop();
 		m_GlobalDate->MtdAutoLoop = true;
-		//printf("start time  = %d \n", m_GlobalDate->mtdconfig.trktime);
 			}
 
 		}
@@ -1637,6 +1643,7 @@ void CManager::usd_API_MTDMode()
 		m_ipc->IPCMtdSwitch(m_GlobalDate->ImgMtdStat, m_GlobalDate->mtdMode);
 		pThis->dtimer.stopTimer(pThis->swtarget_id);
 		m_GlobalDate->MtdAutoLoop = false;
+		AutoTimer = true;
 	}
 
 	if(!m_GlobalDate->ImgMtdStat)
@@ -3612,11 +3619,11 @@ int  CManager::configAvtFromFile()
 				{
 					//Mtd
 					m_ipc->pMtd->targetNum = (int)fr["cfg_avt_848"];
-					m_ipc->pMtd->trackTime = (int)fr["cfg_avt_849"];
 					m_ipc->pMtd->maxArea = (int)fr["cfg_avt_850"];
 					m_ipc->pMtd->minArea = (int)fr["cfg_avt_851"];
 					m_ipc->pMtd->sensitivity = (int)fr["cfg_avt_852"];
-
+					m_ipc->pMtd->trackTime = (int)fr["cfg_avt_855"];
+					m_GlobalDate->mtdconfig.trktime = m_ipc->pMtd->trackTime*1000;
 				}
 
 
@@ -3630,10 +3637,10 @@ int  CManager::configAvtFromFile()
 
 	m_ipc->ipc_OSD->OSD_draw_show = 1;
 	m_ipc->ipc_OSD->osdUserShow = 1;
-	m_ipc->IpcConfig();
 	m_ipc->IpcConfigOSDTEXT();
 	m_ipc->IPCSendMtdFrame();
 	m_ipc->IPCSendBallParam();
+	m_ipc->IpcConfig();
 }
 
 void CManager::Enableresolution(CMD_IPCRESOLUTION resolu)
@@ -5572,7 +5579,7 @@ printf("modifer============>check = %d  value = %f\n", check, value);
 			break;
 
 		case 855:
-			m_GlobalDate->mtdconfig.trktime = (int)value * 1000;
+			m_GlobalDate->mtdconfig.trktime = (int)value*1000;
 			break;
 
 		case 856:
@@ -8761,7 +8768,7 @@ int CManager::answerRead(int block, int field)
 			break;
 
 		case 855:
-			 value=m_GlobalDate->mtdconfig.trktime * 1000;
+			 value=m_GlobalDate->mtdconfig.trktime / 1000;
 				break;
 		case 856:
 		  value=m_GlobalDate->mtdconfig.warning ;

@@ -819,7 +819,6 @@ void CPTZControl::setZoomPos(Uint16 value)
 {
 	p_D->MakeSetZoomPos(m_pReq,value,m_byAddr);
 	SendCmd(m_pReq, PELCO_RESPONSE_Null);
-	printf("set Zoom \n");
 }
 
 void CPTZControl::CtrlZoomPos(unsigned int zoom)

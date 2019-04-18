@@ -150,6 +150,7 @@ private:
 	static void MSGAPI_IPC_Mtdpolar(long p);
 	static void MSGAPI_IPC_ballparam(long p);
 	static void MSGAPI_IPC_UserOSDSWITCH(long p);
+	static void MSGAPI_IPC_INPUT_reset_swtarget_timer(long p);
 
 	static void MSGAPI_IPC_QueryPos(long p);
 	static void MSGAPI_IPC_INPUT_PosAndZoom(long p);
@@ -219,19 +220,20 @@ private:
 
 	bool exitSpeedLoop_Linkage;
 	OSA_ThrHndl Linkage_SpeedLoop;
-
+	int AutoTimer = true;
 	static void* linkage_SpeedLoop(void* prm)
 	{
 		CManager* sThis = (CManager*) prm;
-		static int flag = true;
+
 		printf("  [Mtd] speedLoop is start \n");
 		for(;sThis->exitSpeedLoop_Linkage == false;)
 		{
 			OSA_semWait(&m_GlobalDate->m_semHndl_automtd, OSA_TIMEOUT_FOREVER);
-			if(flag)
+			if(sThis->AutoTimer)
 			{
 				sThis->dtimer.startTimer(sThis->swtarget_id, m_GlobalDate->mtdconfig.trktime);
-				flag = false;
+				sThis->AutoTimer = false;
+				printf("[%s] %d recv speedLoop, open Timer [Time = %d ]\n", __func__, __LINE__, m_GlobalDate->mtdconfig.trktime);
 			}
 			if(m_GlobalDate->MtdAutoLoop)
 			{
