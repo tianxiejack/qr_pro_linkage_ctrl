@@ -251,6 +251,7 @@ bool MtdAutoLoop;
 int ThreeMode_bak;
 int Sync_Query;
 int sync_pos;
+int sync_zoom;
 unsigned short rcv_zoomValue;
 int jos_ctrl;
 int host_ctrl;

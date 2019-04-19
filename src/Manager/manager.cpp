@@ -1737,17 +1737,18 @@ void CManager::reset_status_AutoMtd()
 
 void CManager::refreshPtzParam()
 {
-	m_GlobalDate->Sync_Query = 1;
-	while(m_GlobalDate->Sync_Query)
+	m_GlobalDate->sync_zoom = 1;
+	while(m_GlobalDate->sync_zoom)
 	{
-		m_ptz->QueryPos();
+		//m_ptz->QueryPos();
 		m_ptz->QueryZoom();
 	}
-
+#if 0
 		int pan = pThis->m_ptz->m_iPanPos;
 		int Tilt = pThis->m_ptz->m_iTiltPos;
 		int zoomValue =  pThis->m_ptz->m_iZoomPos;
 		m_ipc->refreshPtzParam(pan, Tilt, zoomValue);
+#endif
 }
 //
 void CManager::ExtInputCtrl_AcqBoxPos()
@@ -8942,6 +8943,14 @@ void CManager::MSGAPI_ExtInputCtrl_ZoomLong()
 		m_ptz->m_iSetZoomSpeed = -1;
 	else
 		m_ptz->m_iSetZoomSpeed = 0;
+	if(m_GlobalDate->jos_params.ctrlMode == jos)
+	{
+		struct timeval tmp;
+		tmp.tv_sec = 0;
+		tmp.tv_usec = 60000;
+		select(0, NULL, NULL, NULL, &tmp);
+		refreshPtzParam();
+	}
 }
 
 void CManager::MSGAPI_ExtInputCtrl_ZoomShort()
@@ -8950,6 +8959,14 @@ void CManager::MSGAPI_ExtInputCtrl_ZoomShort()
 		m_ptz->m_iSetZoomSpeed = 1;
 	else
 		m_ptz->m_iSetZoomSpeed = 0;
+	if(m_GlobalDate->jos_params.ctrlMode == jos)
+	{
+		struct timeval tmp;
+		tmp.tv_sec = 0;
+		tmp.tv_usec = 60000;
+		select(0, NULL, NULL, NULL, &tmp);
+		refreshPtzParam();
+	}
 }
 
 void CManager::MSGAPI_ExtInputCtrl_IrisDown()

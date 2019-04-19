@@ -196,7 +196,7 @@ void CPTZControl::dataInThrd()
 
 void CPTZControl::RecvByte(unsigned char byRecv)
 {
-	int sync_pan, sync_Tilt;
+	int sync_pan, sync_Tilt, sync_zoom;
 	if(uiCurRecvLen == 0){
 
 		if(byRecv == 0xFF){
@@ -262,7 +262,7 @@ void CPTZControl::RecvByte(unsigned char byRecv)
 				m_iZoomPos <<= 8;
 				m_iZoomPos += recvBuffer[5];
 				_GlobalDate->rcv_zoomValue = (unsigned short)m_iZoomPos;
-				//printf("INFO: zoompos is %d\n",m_iZoomPos);
+				sync_zoom = 1;
 				break;
 			case 0x63:
 				m_iMagnification = recvBuffer[4];
@@ -276,12 +276,14 @@ void CPTZControl::RecvByte(unsigned char byRecv)
 				OSA_semSignal(&m_sem);
 			uiCurRecvLen = 0;
 			m_nWait = 0;
-			if(sync_pan &&  sync_Tilt)
+			if(sync_pan &&  sync_Tilt && sync_zoom)
 				_GlobalDate->Sync_Query = 0;
 			if(sync_pan &&  sync_Tilt)
 				_GlobalDate->sync_pos= 0;
+			if(sync_zoom)
+				_GlobalDate->sync_zoom = 0;
 
-			sync_pan = sync_Tilt = 0;
+			sync_pan = sync_Tilt = sync_zoom = 0;
 		}
 	}
 }
@@ -306,7 +308,7 @@ int CPTZControl::SendCmd(LPPELCO_D_REQPKT pCmd, PELCO_RESPONSE_t tResp /* = PELC
 		OSA_printf(">>>>>>>>>>>>>>>>>>>>>>>>PTZ send msg time out!\n");
 		sign++;
 		if(sign == 5)
-			_GlobalDate->sync_pos= _GlobalDate->Sync_Query = 0;
+			_GlobalDate->sync_pos= _GlobalDate->Sync_Query = _GlobalDate->sync_zoom= 0;
 		iRet = -1;
 	}
 	else
