@@ -241,7 +241,8 @@ private:
 				int Tilt = m_GlobalDate->linkagePos.tilPos;
 				int zoom = m_GlobalDate->linkagePos.zoom;
 				sThis->m_ptz->ptzSetSpeed(pan, Tilt);
-				sThis->m_ptz->setZoomPos(zoom);
+				if(zoom>=2849 && zoom <= 65535)
+					sThis->m_ptz->setZoomPos(zoom);
 			}
 		}
 

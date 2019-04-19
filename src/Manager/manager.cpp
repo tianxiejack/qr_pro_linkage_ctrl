@@ -527,7 +527,6 @@ void CManager::MSGAPI_EXT_INPUT_setPan(long p)
 	int chid = m_GlobalDate->chid_camera;
 	int pan = m_GlobalDate->m_camera_pos[chid].setpan;
 	int Tilt = m_GlobalDate->Mtd_Moitor_Y;
-	printf("pan = %d \n", pan);
 	pThis->m_ptz->ptzSetPos(pan, Tilt);
 }
 
@@ -537,7 +536,6 @@ void CManager::MSGAPI_EXT_INPUT_setTilt(long p)
 	int chid = m_GlobalDate->chid_camera;
 	int pan = m_GlobalDate->Mtd_Moitor_X;
 	int Tilt = m_GlobalDate->m_camera_pos[chid].settilt;
-	printf("Tilt = %d \n", Tilt);
 	pThis->m_ptz->ptzSetPos(pan, Tilt);
 }
 
@@ -608,7 +606,8 @@ void CManager::MSGAPI_IPC_INPUT_PosAndZoom(long p)
 	unsigned int Tilt = m_GlobalDate->linkagePos.tilPos;
 	unsigned int zoom = m_GlobalDate->linkagePos.zoom;
 	pThis->m_ptz->ptzSetPos(pan,Tilt);
-	pThis->m_ptz->setZoomPos(zoom);
+	if(zoom>=2849 && zoom <= 65535)
+		pThis->m_ptz->setZoomPos(zoom);
 }
 
 void CManager::MSGAPI_IPC_INPUT_VideoNameAndPos(long p)
@@ -1133,7 +1132,6 @@ void CManager::usd_API_WORKMODEWITCH()
 		m_GlobalDate->ImgMtdStat = m_GlobalDate->mtdMode = 0;
 		usd_API_MTDMode();
 		m_GlobalDate->jos_params.workMode = manual_linkage;
-		refreshPtzParam();
 		break;
 	case 0x02:
 		m_GlobalDate->ImgMtdStat = 1;
@@ -8944,14 +8942,6 @@ void CManager::MSGAPI_ExtInputCtrl_ZoomLong()
 		m_ptz->m_iSetZoomSpeed = -1;
 	else
 		m_ptz->m_iSetZoomSpeed = 0;
-	if(m_GlobalDate->jos_params.workMode == manual_linkage)
-	{
-		struct timeval tmp;
-		tmp.tv_sec = 0;
-		tmp.tv_usec = 60000;
-		select(0, NULL, NULL, NULL, &tmp);
-		refreshPtzParam();
-	}
 }
 
 void CManager::MSGAPI_ExtInputCtrl_ZoomShort()
@@ -8960,14 +8950,6 @@ void CManager::MSGAPI_ExtInputCtrl_ZoomShort()
 		m_ptz->m_iSetZoomSpeed = 1;
 	else
 		m_ptz->m_iSetZoomSpeed = 0;
-	if(m_GlobalDate->jos_params.workMode == manual_linkage)
-	{
-		struct timeval tmp;
-		tmp.tv_sec = 0;
-		tmp.tv_usec = 60000;
-		select(0, NULL, NULL, NULL, &tmp);
-		refreshPtzParam();
-	}
 }
 
 void CManager::MSGAPI_ExtInputCtrl_IrisDown()
