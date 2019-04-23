@@ -58,10 +58,12 @@ void CManager::creat()
 	int x = 960;
 	int y = 540;
 	m_ipc->IPCBoresightPosCtrl(x, y);
+	/*
 	struct timeval tmp;
 	tmp.tv_sec = 3;
 	tmp.tv_usec = 0;
 	select(0, NULL, NULL, NULL, &tmp);
+	*/
 	m_GlobalDate->workMode = m_GlobalDate->default_workMode;
 	usd_API_WORKMODEWITCH();
 }
