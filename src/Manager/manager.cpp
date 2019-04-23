@@ -1132,15 +1132,21 @@ void CManager::usd_API_WORKMODEWITCH()
 		m_GlobalDate->ImgMtdStat = m_GlobalDate->mtdMode = 0;
 		usd_API_MTDMode();
 		m_GlobalDate->jos_params.workMode = manual_linkage;
+		m_GlobalDate->jos_params.ctrlMode = mouse;
 		break;
 	case 0x02:
 		m_GlobalDate->ImgMtdStat = 1;
 		m_GlobalDate->mtdMode = 0;
 		usd_API_MTDMode();
 		m_GlobalDate->jos_params.workMode = Auto_linkage;
+		m_GlobalDate->jos_params.ctrlMode = jos;
 		break;
 	case 0x03:
 		m_GlobalDate->jos_params.workMode = ballctrl;
+		if(m_GlobalDate->jos_params.menu == true)
+			m_GlobalDate->jos_params.ctrlMode = mouse;
+		else
+			m_GlobalDate->jos_params.ctrlMode = jos;
 		break;
 	}
 	m_GlobalDate->jos_params.type = workMode;
